@@ -13,7 +13,7 @@ builder.Services.AddDbContext<FinTrackContext>(options =>
 
 builder.Services.AddDefaultIdentity<Usuario>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedAccount = true;
 })
 .AddEntityFrameworkStores<FinTrackContext>();
 
