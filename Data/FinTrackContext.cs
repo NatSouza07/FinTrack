@@ -11,8 +11,8 @@ namespace FinTrack.Data
         {
         }
 
-        /*public DbSet<Conta> Contas { get; set; }
-        public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Conta> Contas { get; set; }
+        /*public DbSet<Categoria> Categorias { get; set; }
         public DbSet<TipoPagamento> TiposPagamento { get; set; }
         public DbSet<Transacao> Transacoes { get; set; }
         public DbSet<Meta> Metas { get; set; }*/
