@@ -1,4 +1,5 @@
 using FinTrack.Data;
+using FinTrack.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 
@@ -10,7 +11,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<FinTrackContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("FinTrackConnection")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<FinTrackContext>();
+builder.Services.AddDefaultIdentity<Usuario>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+})
+.AddEntityFrameworkStores<FinTrackContext>();
 
 var app = builder.Build();
 
@@ -27,10 +32,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapRazorPages();
 
 app.Run();
