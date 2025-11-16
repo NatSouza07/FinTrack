@@ -22,5 +22,19 @@ public class FinTrackContext(DbContextOptions<FinTrackContext> options)
             .WithMany(c => c.Transacoes)
             .HasForeignKey(t => t.ContaId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Categoria>()
+            .HasIndex(c => new { c.Nome, c.Tipo })
+            .IsUnique();
+
+        builder.Entity<TipoPagamento>()
+            .HasIndex(tp => tp.Nome)
+            .IsUnique();
+
+        builder.Entity<Transacao>()
+            .HasOne(t => t.TipoPagamento)
+            .WithMany()
+            .HasForeignKey(t => t.TipoPagamentoId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
