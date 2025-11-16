@@ -8,7 +8,7 @@ namespace FinTrack.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "O tipo da transação é obrigatório.")]
-        public TipoPagamento Tipo { get; set; }
+        public TipoTransacao Tipo { get; set; }
 
         [Required(ErrorMessage = "O valor da transação é obrigatório.")]
         [Column(TypeName = "decimal(18,2)")]
@@ -19,19 +19,19 @@ namespace FinTrack.Models
 
         [Required]
         public int ContaId { get; set; }
-        public Conta Conta { get; set; }
+        public Conta Conta { get; set; } = null!;
 
         [Required]
         public int CategoriaId { get; set; }
-        public Categoria Categoria { get; set; }
+        public Categoria Categoria { get; set; } = null!;
 
         [Required]
         public int TipoPagamentoId { get; set; }
-        public TipoPagamento TipoPagamento { get; set; }
+        public TipoPagamento TipoPagamento { get; set; } = null!;
 
         [Required]
-        public int UsuarioId { get; set; } = string.Empty;
-        public Usuario Usuario { get; set; }
+        public string UsuarioId { get; set; } = string.Empty;
+        public Usuario Usuario { get; set; } = null!;
 
         public enum TipoTransacao
         {

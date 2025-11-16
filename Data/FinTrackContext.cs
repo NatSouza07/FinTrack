@@ -2,20 +2,25 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using FinTrack.Models;
 
-namespace FinTrack.Data
+namespace FinTrack.Data;
+
+public class FinTrackContext(DbContextOptions<FinTrackContext> options)
+    : IdentityDbContext<Usuario>(options)
 {
-    public class FinTrackContext : IdentityDbContext<Usuario>
+    public DbSet<Conta> Contas { get; set; }
+    public DbSet<Categoria> Categorias { get; set; }
+    public DbSet<TipoPagamento> TiposPagamento { get; set; }
+    public DbSet<Transacao> Transacoes { get; set; }
+    public DbSet<Meta> Metas { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        public FinTrackContext(DbContextOptions<FinTrackContext> options)
-            : base(options)
-        {
-        }
+        base.OnModelCreating(builder);
 
-        public DbSet<Conta> Contas { get; set; }
-        /*public DbSet<Categoria> Categorias { get; set; }
-        public DbSet<TipoPagamento> TiposPagamento { get; set; }
-        public DbSet<Transacao> Transacoes { get; set; }
-        public DbSet<Meta> Metas { get; set; }*/
-
+        builder.Entity<Transacao>()
+            .HasOne(t => t.Conta)
+            .WithMany(c => c.Transacoes)
+            .HasForeignKey(t => t.ContaId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
