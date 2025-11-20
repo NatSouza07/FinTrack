@@ -1,8 +1,22 @@
 ﻿@page
 @model ConfirmEmailModel
 @{
-    ViewData["Title"] = "Confirm email";
+    ViewData["Title"] = "Confirmação de E-mail";
+    Layout = "_AuthLayout";
 }
 
-<h1>@ViewData["Title"]</h1>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+<div class="auth-container">
+    <div class="auth-card text-center">
+
+        <div class="auth-logo mb-3">
+            <img src="~/img/logo.png" />
+        </div>
+
+        <h2 class="auth-title mb-3">Confirmação de E-mail</h2>
+
+        <partial name="_StatusMessage" model="Model.StatusMessage" />
+
+        <a href="~/" class="auth-btn mt-3">Ir para a página inicial</a>
+
+    </div>
+</div>

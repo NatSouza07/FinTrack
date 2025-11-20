@@ -1,10 +1,25 @@
 ﻿@page
 @model LockoutModel
 @{
-    ViewData["Title"] = "Locked out";
+    ViewData["Title"] = "Conta Bloqueada";
+    Layout = "_AuthLayout";
 }
 
-<header>
-    <h1 class="text-danger">@ViewData["Title"]</h1>
-    <p class="text-danger">This account has been locked out, please try again later.</p>
-</header>
+<div class="auth-container">
+    <div class="auth-card text-center">
+
+        <div class="auth-logo mb-3">
+            <img src="~/img/logo.png" />
+        </div>
+
+        <h2 class="text-danger mb-3">Conta Temporariamente Bloqueada</h2>
+
+        <p class="text-danger">
+            Sua conta foi bloqueada devido a múltiplas tentativas de login inválidas.
+            Por favor, tente novamente mais tarde.
+        </p>
+
+        <a href="~/" class="auth-btn mt-3">Voltar ao início</a>
+
+    </div>
+</div>

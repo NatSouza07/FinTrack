@@ -1,11 +1,27 @@
 ﻿@page
 @model DownloadPersonalDataModel
 @{
-    ViewData["Title"] = "Download Your Data";
+    ViewData["Title"] = "Baixar Dados Pessoais";
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
-<h3>@ViewData["Title"]</h3>
+<h1 class="ft-title mb-4">
+    <i class="bi bi-download me-2"></i> Baixar Seus Dados
+</h1>
+
+<div class="ft-card p-4 col-md-6">
+
+    <p class="mb-3 text-light">
+        Seus dados pessoais serão exportados em um arquivo JSON contendo todas as informações associadas à sua conta.
+    </p>
+
+    <form method="post">
+        <button class="btn btn-warning w-100 fw-semibold" type="submit">
+            <i class="bi bi-file-earmark-arrow-down me-2"></i> Baixar Dados
+        </button>
+    </form>
+
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

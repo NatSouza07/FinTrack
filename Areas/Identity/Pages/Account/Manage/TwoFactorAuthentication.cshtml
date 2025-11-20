@@ -1,71 +1,47 @@
 ﻿@page
-@using Microsoft.AspNetCore.Http.Features
 @model TwoFactorAuthenticationModel
 @{
-    ViewData["Title"] = "Two-factor authentication (2FA)";
+    ViewData["Title"] = "Autenticação em Duas Etapas (2FA)";
     ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
 }
 
-<partial name="_StatusMessage" for="StatusMessage" />
-<h3>@ViewData["Title"]</h3>
-@{
-    var consentFeature = HttpContext.Features.Get<ITrackingConsentFeature>();
-    @if (consentFeature?.CanTrack ?? true)
+<div class="ft-manage-header">
+    <h1 class="ft-manage-title">Autenticação em Duas Etapas (2FA)</h1>
+    <p class="ft-manage-subtitle">
+        Adicione uma camada extra de segurança à sua conta utilizando um aplicativo autenticador.
+    </p>
+</div>
+
+<div class="manage-card mb-4">
+
+    <partial name="_StatusMessage" for="StatusMessage" />
+
+    @if (!Model.Is2faEnabled)
     {
-        @if (Model.Is2faEnabled)
-        {
-            if (Model.RecoveryCodesLeft == 0)
-            {
-                <div class="alert alert-danger">
-                    <strong>You have no recovery codes left.</strong>
-                    <p>You must <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a> before you can log in with a recovery code.</p>
-                </div>
-            }
-            else if (Model.RecoveryCodesLeft == 1)
-            {
-                <div class="alert alert-danger">
-                    <strong>You have 1 recovery code left.</strong>
-                    <p>You can <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
-                </div>
-            }
-            else if (Model.RecoveryCodesLeft <= 3)
-            {
-                <div class="alert alert-warning">
-                    <strong>You have @Model.RecoveryCodesLeft recovery codes left.</strong>
-                    <p>You should <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
-                </div>
-            }
+        <p class="text-light mb-3">
+            A autenticação 2FA está desativada. Ative para aumentar sua segurança.
+        </p>
 
-            if (Model.IsMachineRemembered)
-            {
-                <form method="post" style="display: inline-block">
-                    <button type="submit" class="btn btn-primary">Forget this browser</button>
-                </form>
-            }
-            <a asp-page="./Disable2fa" class="btn btn-primary">Disable 2FA</a>
-            <a asp-page="./GenerateRecoveryCodes" class="btn btn-primary">Reset recovery codes</a>
-        }
-
-        <h4>Authenticator app</h4>
-        @if (!Model.HasAuthenticator)
-        {
-            <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-primary">Add authenticator app</a>
-        }
-        else
-        {
-            <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-primary">Set up authenticator app</a>
-            <a id="reset-authenticator" asp-page="./ResetAuthenticator" class="btn btn-primary">Reset authenticator app</a>
-        }
+        <a class="btn ft-btn-primary w-100 mb-3" asp-page="./EnableAuthenticator">
+            <i class="bi bi-shield-check me-2"></i> Ativar Autenticador
+        </a>
     }
     else
     {
-        <div class="alert alert-danger">
-            <strong>Privacy and cookie policy have not been accepted.</strong>
-            <p>You must accept the policy before you can enable two factor authentication.</p>
-        </div>
-    }
-}
+        <p class="text-light mb-3">
+            Sua conta está protegida com 2FA.
+        </p>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+        <a class="btn ft-btn-primary w-100 mb-3" asp-page="./EnableAuthenticator">
+            <i class="bi bi-phone me-2"></i> Configurar Novo Autenticador
+        </a>
+
+        <a class="btn ft-btn-danger w-100 mb-3" asp-page="./ResetAuthenticator">
+            <i class="bi bi-arrow-clockwise me-2"></i> Redefinir Autenticador
+        </a>
+
+        <a class="btn btn-secondary w-100" asp-page="./Disable2fa">
+            <i class="bi bi-shield-x me-2"></i> Desativar 2FA
+        </a>
+    }
+</div>

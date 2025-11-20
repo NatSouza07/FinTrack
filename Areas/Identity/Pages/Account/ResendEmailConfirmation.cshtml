@@ -1,23 +1,39 @@
 ﻿@page
 @model ResendEmailConfirmationModel
 @{
-    ViewData["Title"] = "Resend email confirmation";
+    ViewData["Title"] = "Reenviar Confirmação de E-mail";
+    Layout = "_AuthLayout";
 }
 
-<h1>@ViewData["Title"]</h1>
-<h2>Enter your email.</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="auth-container">
+    <div class="auth-card text-center">
+
+        <div class="auth-logo mb-3">
+            <img src="~/img/logo.png" />
+        </div>
+
+        <h2 class="auth-title mb-3">Reenviar E-mail de Confirmação</h2>
+
+        <p class="text-info mb-3">
+            Informe seu e-mail para reenviar o link de confirmação.
+        </p>
+
         <form method="post">
-            <div asp-validation-summary="All" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" class="form-control" aria-required="true" placeholder="name@example.com" />
+
+            <div asp-validation-summary="All" class="text-warning mb-2"></div>
+
+            <div class="mb-3">
                 <label asp-for="Input.Email" class="form-label"></label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                <input asp-for="Input.Email"
+                       class="form-control auth-input"
+                       aria-required="true" />
+                <span asp-validation-for="Input.Email" class="text-warning"></span>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
+
+            <button type="submit" class="auth-btn w-100">Reenviar</button>
+
         </form>
+
     </div>
 </div>
 

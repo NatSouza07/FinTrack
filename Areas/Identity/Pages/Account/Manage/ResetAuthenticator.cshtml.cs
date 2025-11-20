@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
-
+using FinTrack.Models;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -13,13 +13,13 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
 {
     public class ResetAuthenticatorModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<Usuario> _userManager;
+        private readonly SignInManager<Usuario> _signInManager;
         private readonly ILogger<ResetAuthenticatorModel> _logger;
 
         public ResetAuthenticatorModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<Usuario> userManager,
+            SignInManager<Usuario> signInManager,
             ILogger<ResetAuthenticatorModel> logger)
         {
             _userManager = userManager;
@@ -27,10 +27,6 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
             _logger = logger;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
 
@@ -55,6 +51,7 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
             await _userManager.ResetAuthenticatorKeyAsync(user);
+
             var userId = await _userManager.GetUserIdAsync(user);
             _logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", user.Id);
 

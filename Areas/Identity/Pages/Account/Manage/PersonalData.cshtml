@@ -1,27 +1,36 @@
 ﻿@page
 @model PersonalDataModel
 @{
-    ViewData["Title"] = "Personal Data";
+    ViewData["Title"] = "Dados Pessoais";
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
-<h3>@ViewData["Title"]</h3>
-
-<div class="row">
-    <div class="col-md-6">
-        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <p>
-            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-        </p>
-        <form id="download-data" asp-page="DownloadPersonalData" method="post">
-            <button class="btn btn-primary" type="submit">Download</button>
-        </form>
-        <p>
-            <a id="delete" asp-page="DeletePersonalData" class="btn btn-danger">Delete</a>
-        </p>
-    </div>
+<div class="ft-manage-header">
+    <h1 class="ft-manage-title">Dados Pessoais</h1>
+    <p class="ft-manage-subtitle">
+        Gerencie os dados associados à sua conta. Você também pode exportá-los ou excluir permanentemente sua conta.
+    </p>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+<div class="manage-card mb-4">
+
+    <partial name="_StatusMessage" for="StatusMessage" />
+
+    <p class="text-light mt-2">
+        Os dados pessoais incluem informações que você forneceu ao FinTrack e podem ser exportados para análise.
+    </p>
+
+    <form method="post" asp-page-handler="Download" class="mt-3">
+        <button class="btn ft-btn-primary w-100">
+            <i class="bi bi-download me-2"></i> Baixar Meus Dados
+        </button>
+    </form>
+
+    <hr class="my-4" />
+
+    <p class="text-warning">A exclusão da conta é permanente e não poderá ser desfeita.</p>
+
+    <a asp-page="./DeletePersonalData" class="btn ft-btn-danger w-100">
+        <i class="bi bi-trash me-2"></i> Excluir Minha Conta
+    </a>
+</div>

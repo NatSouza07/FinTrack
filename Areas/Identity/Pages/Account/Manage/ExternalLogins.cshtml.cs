@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
-
+using FinTrack.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,14 +16,14 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
 {
     public class ExternalLoginsModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly IUserStore<IdentityUser> _userStore;
+        private readonly UserManager<Usuario> _userManager;
+        private readonly SignInManager<Usuario> _signInManager;
+        private readonly IUserStore<Usuario> _userStore;
 
         public ExternalLoginsModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
-            IUserStore<IdentityUser> userStore)
+            UserManager<Usuario> userManager,
+            SignInManager<Usuario> signInManager,
+            IUserStore<Usuario> userStore)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -31,26 +31,22 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        /// Logins externos já conectados à conta.
         /// </summary>
         public IList<UserLoginInfo> CurrentLogins { get; set; }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        /// Provedores disponíveis para adicionar.
         /// </summary>
         public IList<AuthenticationScheme> OtherLogins { get; set; }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        /// Mostra o botão de remover login externo.
         /// </summary>
         public bool ShowRemoveButton { get; set; }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        /// Mensagem de status exibida no topo.
         /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
@@ -59,22 +55,26 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+                return NotFound($"Não foi possível carregar o usuário com ID '{_userManager.GetUserId(User)}'.");
 
+            // Logins atuais
             CurrentLogins = await _userManager.GetLoginsAsync(user);
+
+            // Provedores ainda não vinculados
             OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
                 .Where(auth => CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
                 .ToList();
 
+            // Verificar se o usuário tem senha local
             string passwordHash = null;
-            if (_userStore is IUserPasswordStore<IdentityUser> userPasswordStore)
+            if (_userStore is IUserPasswordStore<Usuario> userPasswordStore)
             {
                 passwordHash = await userPasswordStore.GetPasswordHashAsync(user, HttpContext.RequestAborted);
             }
 
+            // Só permite remover login externo se houver uma senha OU mais de um login externo
             ShowRemoveButton = passwordHash != null || CurrentLogins.Count > 1;
+
             return Page();
         }
 
@@ -82,30 +82,32 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+                return NotFound($"Não foi possível carregar o usuário com ID '{_userManager.GetUserId(User)}'.");
 
             var result = await _userManager.RemoveLoginAsync(user, loginProvider, providerKey);
             if (!result.Succeeded)
             {
-                StatusMessage = "The external login was not removed.";
+                StatusMessage = "Não foi possível remover o login externo.";
                 return RedirectToPage();
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "The external login was removed.";
+            StatusMessage = "Login externo removido com sucesso.";
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostLinkLoginAsync(string provider)
         {
-            // Clear the existing external cookie to ensure a clean login process
+            // Garante limpeza do cookie externo anterior
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Page("./ExternalLogins", pageHandler: "LinkLoginCallback");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(User));
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(
+                provider,
+                redirectUrl,
+                _userManager.GetUserId(User)
+            );
+
             return new ChallengeResult(provider, properties);
         }
 
@@ -113,28 +115,24 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+                return NotFound($"Não foi possível carregar o usuário com ID '{_userManager.GetUserId(User)}'.");
 
             var userId = await _userManager.GetUserIdAsync(user);
             var info = await _signInManager.GetExternalLoginInfoAsync(userId);
+
             if (info == null)
-            {
-                throw new InvalidOperationException($"Unexpected error occurred loading external login info.");
-            }
+                throw new InvalidOperationException("Erro inesperado ao carregar informações de login externo.");
 
             var result = await _userManager.AddLoginAsync(user, info);
             if (!result.Succeeded)
             {
-                StatusMessage = "The external login was not added. External logins can only be associated with one account.";
+                StatusMessage = "Não foi possível adicionar o login externo. Ele pode já estar associado a outra conta.";
                 return RedirectToPage();
             }
 
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-            StatusMessage = "The external login was added.";
+            StatusMessage = "Login externo adicionado com sucesso.";
             return RedirectToPage();
         }
     }

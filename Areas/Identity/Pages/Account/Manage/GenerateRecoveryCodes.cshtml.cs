@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
-
+using FinTrack.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,11 +14,11 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
 {
     public class GenerateRecoveryCodesModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Usuario> _userManager;
         private readonly ILogger<GenerateRecoveryCodesModel> _logger;
 
         public GenerateRecoveryCodesModel(
-            UserManager<IdentityUser> userManager,
+            UserManager<Usuario> userManager,
             ILogger<GenerateRecoveryCodesModel> logger)
         {
             _userManager = userManager;
@@ -26,15 +26,13 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        /// Códigos de recuperação gerados.
         /// </summary>
         [TempData]
         public string[] RecoveryCodes { get; set; }
 
         /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
+        /// Mensagem exibida ao usuário.
         /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
@@ -42,16 +40,14 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+                return NotFound($"Não foi possível carregar o usuário com ID '{_userManager.GetUserId(User)}'.");
 
             var isTwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
+
             if (!isTwoFactorEnabled)
-            {
-                throw new InvalidOperationException($"Cannot generate recovery codes for user because they do not have 2FA enabled.");
-            }
+                throw new InvalidOperationException("Não é possível gerar códigos de recuperação porque o 2FA não está habilitado.");
 
             return Page();
         }
@@ -59,23 +55,23 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
+                return NotFound($"Não foi possível carregar o usuário com ID '{_userManager.GetUserId(User)}'.");
 
             var isTwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user);
-            var userId = await _userManager.GetUserIdAsync(user);
+
             if (!isTwoFactorEnabled)
-            {
-                throw new InvalidOperationException($"Cannot generate recovery codes for user as they do not have 2FA enabled.");
-            }
+                throw new InvalidOperationException("Não é possível gerar códigos de recuperação porque o 2FA não está habilitado.");
+
+            var userId = await _userManager.GetUserIdAsync(user);
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
             RecoveryCodes = recoveryCodes.ToArray();
 
-            _logger.LogInformation("User with ID '{UserId}' has generated new 2FA recovery codes.", userId);
-            StatusMessage = "You have generated new recovery codes.";
+            _logger.LogInformation("Usuário com ID '{UserId}' gerou novos códigos de recuperação 2FA.", userId);
+
+            StatusMessage = "Novos códigos de recuperação foram gerados.";
             return RedirectToPage("./ShowRecoveryCodes");
         }
     }

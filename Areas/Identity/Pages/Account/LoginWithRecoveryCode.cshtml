@@ -1,26 +1,40 @@
 ﻿@page
 @model LoginWithRecoveryCodeModel
 @{
-    ViewData["Title"] = "Recovery code verification";
+    ViewData["Title"] = "Entrar com Código de Recuperação";
+    Layout = "_AuthLayout";
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
-<p>
-    You have requested to log in with a recovery code. This login will not be remembered until you provide
-    an authenticator app code at log in or disable 2FA and log in again.
-</p>
-<div class="row">
-    <div class="col-md-4">
+<div class="auth-container">
+    <div class="auth-card text-center">
+
+        <div class="auth-logo mb-3">
+            <img src="~/img/logo.png" />
+        </div>
+
+        <h2 class="auth-title mb-3">Código de Recuperação</h2>
+
+        <p class="text-info mb-3">
+            Você está tentando entrar usando um código de recuperação.
+            Este login não será lembrado até que você insira um código do app autenticador ou desative a 2FA.
+        </p>
+
         <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.RecoveryCode" class="form-control" autocomplete="off" placeholder="RecoveryCode" />
+
+            <div asp-validation-summary="ModelOnly" class="text-warning mb-2"></div>
+
+            <div class="mb-3">
                 <label asp-for="Input.RecoveryCode" class="form-label"></label>
-                <span asp-validation-for="Input.RecoveryCode" class="text-danger"></span>
+                <input asp-for="Input.RecoveryCode"
+                       class="form-control auth-input"
+                       autocomplete="off" />
+                <span asp-validation-for="Input.RecoveryCode" class="text-warning"></span>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+
+            <button type="submit" class="auth-btn w-100">Entrar</button>
+
         </form>
+
     </div>
 </div>
 

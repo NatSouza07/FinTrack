@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Areas\Identity\Pages\Account\Manage\_Layout.cshtml" />
     <Content Remove="wwwroot\css\premium.cs" />
   </ItemGroup>
 

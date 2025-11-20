@@ -1,21 +1,38 @@
 ﻿@page
 @model LogoutModel
 @{
-    ViewData["Title"] = "Log out";
+    ViewData["Title"] = "Sair";
+    Layout = "_AuthLayout";
 }
 
-<header>
-    <h1>@ViewData["Title"]</h1>
-    @{
-        if (User.Identity?.IsAuthenticated ?? false)
+<div class="auth-container">
+    <div class="auth-card text-center">
+
+        <div class="auth-logo mb-3">
+            <img src="~/img/logo.png" />
+        </div>
+
+        <h2 class="auth-title mb-3">Sair da Conta</h2>
+
+        @if (User.Identity?.IsAuthenticated ?? false)
         {
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
+            <form asp-area="Identity"
+                  asp-page="/Account/Logout"
+                  asp-route-returnUrl="@Url.Page("/", new { area = "" })"
+                  method="post">
+
+                <p class="text-info mb-3">
+                    Tem certeza que deseja sair?
+                </p>
+
+                <button type="submit" class="auth-btn w-100">Sair</button>
             </form>
         }
         else
         {
-            <p>You have successfully logged out of the application.</p>
+            <p class="text-success">Você saiu da sua conta com sucesso.</p>
+            <a href="~/" class="auth-btn mt-3">Voltar ao início</a>
         }
-    }
-</header>
+
+    </div>
+</div>

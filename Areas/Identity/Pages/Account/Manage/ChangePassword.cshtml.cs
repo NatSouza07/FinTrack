@@ -1,8 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
-
-using System;
+using FinTrack.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -12,84 +8,52 @@ using Microsoft.Extensions.Logging;
 
 namespace FinTrack.Areas.Identity.Pages.Account.Manage
 {
-    public class ChangePasswordModel : PageModel
+    public class ChangePasswordModel(
+        UserManager<Usuario> userManager,
+        SignInManager<Usuario> signInManager,
+        ILogger<ChangePasswordModel> logger
+    ) : PageModel
+
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly ILogger<ChangePasswordModel> _logger;
+        private readonly UserManager<Usuario> _userManager = userManager;
+        private readonly SignInManager<Usuario> _signInManager = signInManager;
+        private readonly ILogger<ChangePasswordModel> _logger = logger;
 
-        public ChangePasswordModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
-            ILogger<ChangePasswordModel> logger)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _logger = logger;
-        }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = new InputModel();
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [TempData]
-        public string StatusMessage { get; set; }
+        public string StatusMessage { get; set; } = string.Empty;
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Required]
             [DataType(DataType.Password)]
-            [Display(Name = "Current password")]
-            public string OldPassword { get; set; }
+            [Display(Name = "Senha atual")]
+            public string OldPassword { get; set; } = string.Empty;
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, MinimumLength = 6,
+                ErrorMessage = "A senha deve ter no mínimo {2} e no máximo {1} caracteres.")]
             [DataType(DataType.Password)]
-            [Display(Name = "New password")]
-            public string NewPassword { get; set; }
+            [Display(Name = "Nova senha")]
+            public string NewPassword { get; set; } = string.Empty;
 
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm new password")]
-            [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
+            [Display(Name = "Confirmar nova senha")]
+            [Compare("NewPassword", ErrorMessage = "A nova senha e a confirmação não conferem.")]
+            public string ConfirmPassword { get; set; } = string.Empty;
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
 
-            var hasPassword = await _userManager.HasPasswordAsync(user);
-            if (!hasPassword)
-            {
+            if (user == null)
+                return NotFound($"Não foi possível carregar o usuário '{_userManager.GetUserId(User)}'.");
+
+            if (!await _userManager.HasPasswordAsync(user))
                 return RedirectToPage("./SetPassword");
-            }
 
             return Page();
         }
@@ -97,29 +61,27 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
-            {
                 return Page();
-            }
 
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
-            }
 
-            var changePasswordResult = await _userManager.ChangePasswordAsync(user, Input.OldPassword, Input.NewPassword);
-            if (!changePasswordResult.Succeeded)
+            if (user == null)
+                return NotFound($"Não foi possível carregar o usuário '{_userManager.GetUserId(User)}'.");
+
+            var result = await _userManager.ChangePasswordAsync(user, Input.OldPassword, Input.NewPassword);
+
+            if (!result.Succeeded)
             {
-                foreach (var error in changePasswordResult.Errors)
-                {
+                foreach (var error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
-                }
+
                 return Page();
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            _logger.LogInformation("User changed their password successfully.");
-            StatusMessage = "Your password has been changed.";
+            _logger.LogInformation("Usuário alterou a senha com sucesso.");
+
+            StatusMessage = "Sua senha foi alterada com sucesso.";
 
             return RedirectToPage();
         }
