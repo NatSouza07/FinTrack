@@ -1,0 +1,205 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+.ft-body {
+    background: #0c0c0c;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.ft-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: rgba(15, 15, 15, 0.55);
+    backdrop-filter: blur(15px);
+    border-right: 1px solid rgba(255, 215, 0, 0.25);
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px 15px;
+    transition: 0.3s ease;
+    overflow: hidden;
+}
+
+    .ft-sidebar.collapsed {
+        width: 80px;
+    }
+
+.ft-toggle-btn {
+    background: transparent;
+    border: none;
+    color: #ffd700;
+    width: 100%;
+    font-size: 22px;
+    text-align: right;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+    .ft-toggle-btn:hover {
+        color: #ffe98f;
+    }
+
+#toggleIcon {
+    transition: 0.3s ease;
+}
+
+.ft-logo-area {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.ft-logo {
+    width: 70px;
+    transition: 0.3s ease;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+}
+
+.ft-sidebar.collapsed .ft-logo {
+    width: 42px;
+}
+
+.ft-menu {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 15px;
+}
+
+    .ft-menu li {
+        margin-bottom: 22px;
+    }
+
+    .ft-menu a {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px;
+        font-size: 16px;
+        color: #f0f0f0;
+        border-radius: 10px;
+        transition: 0.25s ease;
+    }
+
+        .ft-menu a:hover {
+            background: rgba(255, 215, 0, 0.18);
+            color: #ffd700;
+        }
+
+    .ft-menu i {
+        font-size: 21px;
+        width: 30px;
+        text-align: center;
+    }
+
+.ft-sidebar.collapsed .ft-menu span {
+    display: none;
+}
+
+.ft-sidebar.collapsed .ft-menu a {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.ft-tooltip {
+    position: relative;
+}
+
+.ft-sidebar.collapsed .ft-tooltip:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 85px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: black;
+    color: #ffd700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    z-index: 9999;
+}
+
+.ft-profile-box {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    width: 88%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: 0.3s ease;
+    cursor: pointer;
+}
+
+.ft-profile-photo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 215, 0, 0.6);
+}
+
+.ft-profile-name {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.ft-profile-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.ft-sidebar.collapsed .ft-profile-details {
+    display: none;
+}
+
+.ft-sidebar.collapsed .ft-profile-box {
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.ft-logout-btn-absolute {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffd700;
+    font-size: 22px;
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    transition: color .25s ease;
+    outline: none !important;
+}
+
+    .ft-logout-btn-absolute:hover {
+        color: #ffe98f;
+    }
+
+    .ft-logout-btn-absolute:focus,
+    .ft-logout-btn-absolute:active {
+        outline: none !important;
+        box-shadow: none !important;
+        background: none !important;
+        color: #ffd700 !important;
+    }
+
+
+.ft-main-content {
+    margin-left: 260px;
+    transition: 0.3s ease;
+    padding: 30px;
+}
+
+    .ft-main-content.collapsed {
+        margin-left: 80px;
+    }
