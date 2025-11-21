@@ -1,7 +1,8 @@
 using FinTrack.Data;
 using FinTrack.Models;
-using Microsoft.EntityFrameworkCore;
+using FinTrack.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<FinTrackContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("FinTrackConnection")));
+
+builder.Services.AddScoped<AccountService>();
 
 builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
 {
