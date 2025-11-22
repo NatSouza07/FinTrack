@@ -1,0 +1,121 @@
+﻿@model FinTrack.Models.Meta
+@{
+    ViewData["Title"] = "Editar Meta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int anoAtual = DateTime.Now.Year;
+}
+
+<div class="ft-page-container">
+
+    <h2 class="fw-bold text-white mb-3">Editar Meta</h2>
+    <p class="text-secondary mb-4">Atualize as informações da meta.</p>
+
+    <div class="ft-card p-4">
+
+        <form asp-action="Edit" method="post">
+
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="ValorMeta" class="form-label text-white-50"></label>
+                <input asp-for="ValorMeta" class="form-control money" inputmode="numeric" />
+                <span asp-validation-for="ValorMeta" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Mes" class="form-label text-white-50"></label>
+                <select asp-for="Mes" class="form-select">
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        if (Model.Mes == m)
+                        {
+                            <option value="@m" selected>
+                                @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@m">
+                                @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                            </option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="Mes" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Ano" class="form-label text-white-50"></label>
+                <select asp-for="Ano" class="form-select">
+                    @for (int y = anoAtual - 5; y <= anoAtual + 10; y++)
+                    {
+                        if (Model.Ano == y)
+                        {
+                            <option value="@y" selected>@y</option>
+                        }
+                        else
+                        {
+                            <option value="@y">@y</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="Ano" class="text-danger"></span>
+            </div>
+
+            <div class="mt-4 d-flex gap-3">
+                <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
+
+                <button type="submit"
+                        class="btn fw-bold px-4"
+                        style="background:#ffd700; color:#000; border-radius:10px;">
+                    Salvar Alterações
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const moneyInputs = document.querySelectorAll(".money");
+
+            moneyInputs.forEach(input => {
+                new AutoNumeric(input, {
+                    digitGroupSeparator: ".",
+                    decimalCharacter: ",",
+                    decimalPlaces: 2,
+                    currencySymbol: "R$ ",
+                    currencySymbolPlacement: "p",
+                    unformatOnSubmit: true
+                });
+            });
+        });
+    </script>
+}
+
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>

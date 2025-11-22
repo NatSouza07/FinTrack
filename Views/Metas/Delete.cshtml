@@ -1,0 +1,51 @@
+﻿@model FinTrack.Models.Meta
+@{
+    ViewData["Title"] = "Excluir Meta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ft-page-container">
+    <h2 class="fw-bold text-white mb-1">Excluir Meta</h2>
+    <p class="text-secondary mb-4">Confirme a exclusão da meta selecionada.</p>
+
+    <div class="ft-card p-4">
+        <dl class="row">
+            <dt class="col-sm-3 text-white-50">Mês / Ano</dt>
+            <dd class="col-sm-9">@Model.Mes / @Model.Ano</dd>
+
+            <dt class="col-sm-3 text-white-50">Valor da Meta</dt>
+            <dd class="col-sm-9">@Model.ValorMeta.ToString("C2")</dd>
+
+            <dt class="col-sm-3 text-white-50">Progresso</dt>
+            <dd class="col-sm-9">@Model.ProgressoCalculado.ToString("C2") (@Model.Porcentagem%)</dd>
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div class="mt-3 d-flex gap-2">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>

@@ -23,5 +23,11 @@ namespace FinTrack.Models
         public string UsuarioId { get; set; } = string.Empty;
         public Usuario Usuario { get; set; } = null!;
 
+        [NotMapped]
+        public decimal ProgressoCalculado { get; set; }
+
+        [NotMapped]
+        public int Porcentagem { get; set; }
+
     }
 }

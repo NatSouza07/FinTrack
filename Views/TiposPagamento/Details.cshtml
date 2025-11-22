@@ -1,0 +1,47 @@
+﻿@model FinTrack.Models.TipoPagamento
+@{
+    ViewData["Title"] = "Detalhes do Tipo de Pagamento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ft-page-container">
+
+    <h2 class="fw-bold text-white mb-3">Detalhes</h2>
+    <p class="text-secondary mb-4">Informações do tipo de pagamento selecionado.</p>
+
+    <div class="ft-card p-4">
+
+        <div class="mb-3">
+            <label class="text-white-50">Nome</label>
+            <input class="form-control" value="@Model.Nome" disabled />
+        </div>
+
+        <div class="mt-4 d-flex gap-3">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-4">Editar</a>
+
+            <a asp-action="Index" class="btn btn-secondary px-4">Voltar</a>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>

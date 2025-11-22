@@ -1,0 +1,63 @@
+﻿@model FinTrack.Models.Meta
+@{
+    ViewData["Title"] = "Detalhes da Meta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ft-page-container">
+    <h2 class="fw-bold text-white mb-1">Detalhes da Meta</h2>
+    <p class="text-secondary mb-4">Visualize o progresso e os dados da meta.</p>
+
+    <div class="ft-card p-4">
+        <dl class="row">
+            <dt class="col-sm-3 text-white-50">Mês / Ano</dt>
+            <dd class="col-sm-9">@Model.Mes / @Model.Ano</dd>
+
+            <dt class="col-sm-3 text-white-50">Valor da Meta</dt>
+            <dd class="col-sm-9">@Model.ValorMeta.ToString("C2")</dd>
+
+            <dt class="col-sm-3 text-white-50">Progresso</dt>
+            <dd class="col-sm-9">@Model.ProgressoCalculado.ToString("C2") (@Model.Porcentagem%)</dd>
+        </dl>
+
+        @{
+            var pct = Model.Porcentagem;
+            var barClass = pct >= 70 ? "ft-progress-green" : (pct >= 30 ? "ft-progress-blue" : "ft-progress-red");
+        }
+        <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1 small text-white-50">
+                <div>Meta alcançada</div>
+                <div><strong>@pct%</strong></div>
+            </div>
+            <div class="progress" style="height:14px; background: rgba(255,255,255,0.04); border-radius:8px;">
+                <div class="progress-bar @barClass" role="progressbar" style="width:@pct%; transition: width 1s ease;"
+                     aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>
