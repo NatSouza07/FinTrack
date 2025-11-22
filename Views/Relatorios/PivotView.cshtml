@@ -1,0 +1,34 @@
+﻿@{
+    ViewData["Title"] = "Pivot";
+}
+
+<h2>Pivot — Categorias × Mês</h2>
+
+<table class="table table-striped" id="pivotTable">
+</table>
+
+<script>
+    async function loadPivot() {
+        const ano = new Date().getFullYear();
+        const res = await fetch(`/Relatorios/Pivot?ano=${ano}`);
+        const dados = await res.json();
+
+        let html = "<tr><th>Categoria</th>";
+
+        for (let m = 1; m <= 12; m++)
+            html += `<th>${m}</th>`;
+
+        html += "</tr>";
+
+        dados.forEach(row => {
+            html += `<tr><td>${row.categoria}</td>`;
+            for (let m = 1; m <= 12; m++)
+                html += `<td>${row[`m${m}`]}</td>`;
+            html += "</tr>";
+        });
+
+        document.getElementById("pivotTable").innerHTML = html;
+    }
+
+    loadPivot();
+</script>

@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Relatórios";
+}
+
+<h2>Relatórios</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Resumo Mensal</h4>
+        <canvas id="mensalChart"></canvas>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Por Categoria</h4>
+        <input type="date" id="inicio" />
+        <input type="date" id="fim" />
+        <button class="btn btn-primary" onclick="loadCategorias()">Filtrar</button>
+        <canvas id="categoriasChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    async function loadMensal() {
+        const ano = new Date().getFullYear();
+        const res = await fetch(`/Relatorios/MensalJson?ano=${ano}`);
+        const dados = await res.json();
+
+        new Chart(document.getElementById("mensalChart"), {
+            type: "bar",
+            data: {
+                labels: ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
+                datasets: [{
+                    label: "Total",
+                    data: dados
+                }]
+            }
+        });
+    }
+
+    async function loadCategorias() {
+        const inicio = document.getElementById("inicio").value;
+        const fim = document.getElementById("fim").value;
+
+        const res = await fetch(`/Relatorios/CategoriasJson?inicio=${inicio}&fim=${fim}`);
+        const dados = await res.json();
+
+        new Chart(document.getElementById("categoriasChart"), {
+            type: "pie",
+            data: {
+                labels: dados.map(x => x.label),
+                datasets: [{
+                    data: dados.map(x => x.value)
+                }]
+            }
+        });
+    }
+
+    loadMensal();
+</script>
