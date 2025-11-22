@@ -1,0 +1,58 @@
+﻿@model FinTrack.Models.Categoria
+@{
+    ViewData["Title"] = "Excluir Categoria";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ft-page-container">
+
+    <h2 class="fw-bold text-danger mb-3">Excluir Categoria</h2>
+    <p class="text-secondary mb-4">Tem certeza de que deseja excluir esta categoria?</p>
+
+    <div class="ft-card p-4">
+
+        <dl class="row text-white">
+            <dt class="col-sm-3">Nome</dt>
+            <dd class="col-sm-9">@Model.Nome</dd>
+
+            <dt class="col-sm-3">Tipo</dt>
+            <dd class="col-sm-9">@Model.Tipo</dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mt-4 d-flex gap-3">
+                <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
+
+                <button type="submit"
+                        class="btn btn-danger px-4 fw-bold"
+                        style="border-radius:10px;">
+                    Confirmar Exclusão
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>

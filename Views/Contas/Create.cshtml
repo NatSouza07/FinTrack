@@ -1,0 +1,82 @@
+﻿@model FinTrack.Models.Conta
+@{
+    ViewData["Title"] = "Nova Conta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ft-page-container">
+
+    <h2 class="fw-bold text-white mb-3">Nova Conta</h2>
+    <p class="text-secondary mb-4">Cadastre uma nova conta para organizar suas finanças.</p>
+
+    <div class="ft-card p-4">
+
+        <form asp-action="Create" method="post">
+
+            <div class="mb-3">
+                <label asp-for="Nome" class="form-label text-white-50"></label>
+                <input asp-for="Nome" class="form-control" />
+                <span asp-validation-for="Nome" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SaldoInicial" class="form-label text-white-50"></label>
+                <input asp-for="SaldoInicial" class="form-control money" inputmode="numeric" />
+                <span asp-validation-for="SaldoInicial" class="text-danger"></span>
+            </div>
+
+            <div class="mt-4 d-flex gap-3">
+                <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
+
+                <button type="submit"
+                        class="btn fw-bold px-4"
+                        style="background:#ffd700; color:#000; border-radius:10px;">
+                    Salvar Conta
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const moneyInputs = document.querySelectorAll(".money");
+
+            moneyInputs.forEach(input => {
+                new AutoNumeric(input, {
+                    digitGroupSeparator: ".",
+                    decimalCharacter: ",",
+                    decimalPlaces: 2,
+                    currencySymbol: "R$ ",
+                    currencySymbolPlacement: "p",
+                    unformatOnSubmit: true
+                });
+            });
+        });
+    </script>
+}
+
+
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>
