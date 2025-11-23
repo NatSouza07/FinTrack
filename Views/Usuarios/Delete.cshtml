@@ -1,0 +1,55 @@
+﻿@model Usuario
+
+@{
+    ViewData["Title"] = "Excluir Usuário";
+}
+
+<h2 class="mb-4 text-light">Excluir Usuário</h2>
+
+<div class="card bg-dark text-light p-4 ft-card">
+
+    <h5 class="mb-3">Tem certeza que deseja excluir este usuário?</h5>
+
+    <div class="mb-3">
+        <strong>Nickname:</strong> @Model.Nickname
+    </div>
+
+    <div class="mb-3">
+        <strong>Email:</strong> @Model.Email
+    </div>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-outline-light">
+                <i class="bi bi-arrow-left"></i> Cancelar
+            </a>
+
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Excluir
+            </button>
+        </div>
+    </form>
+
+</div>
+
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>

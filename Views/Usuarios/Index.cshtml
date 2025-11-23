@@ -1,0 +1,75 @@
+﻿@model IEnumerable<Usuario>
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<Usuario> UserManager
+
+@{
+    ViewData["Title"] = "Gestão de Usuários";
+}
+
+<h2 class="mb-4 text-light">Gestão de Usuários</h2>
+
+<table class="table table-dark table-hover align-middle ft-table">
+    <thead>
+        <tr>
+            <th>Nickname</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th class="text-end">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var usuario in Model)
+        {
+            var roles = await UserManager.GetRolesAsync(usuario);
+            var role = roles.FirstOrDefault() ?? "Sem Role";
+
+            <tr>
+                <td>@usuario.Nickname</td>
+                <td>@usuario.Email</td>
+                <td>
+                    <span class="badge @(role == "Admin" ? "bg-warning text-dark" : "bg-info")">
+                        @role
+                    </span>
+                </td>
+                <td class="text-end">
+
+                    <a asp-action="Edit"
+                       asp-route-id="@usuario.Id"
+                       class="btn btn-sm btn-outline-primary me-2">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+
+                    @if (usuario.Email?.ToLower() != "admin@fintrack.com")
+                    {
+                        <a asp-action="Delete"
+                           asp-route-id="@usuario.Id"
+                           class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>

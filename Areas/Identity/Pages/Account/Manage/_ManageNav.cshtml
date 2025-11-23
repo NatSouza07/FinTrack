@@ -6,37 +6,61 @@
 }
 
 <ul class="ft-manage-menu">
+
+    @if (User.IsInRole("Admin"))
+    {
+        <li>
+            <a asp-controller="Usuarios"
+               asp-action="Index"
+               class="ft-manage-link">
+                <i class="bi bi-people-fill"></i> Gestão de Usuários
+            </a>
+        </li>
+    }
+
     <li>
-        <a class="ft-manage-link @(ManageNavPages.IndexNavClass(ViewContext))" asp-page="./Index">
+        <a class="ft-manage-link @(ManageNavPages.IndexNavClass(ViewContext))"
+           asp-page="./Index">
             <i class="bi bi-person-circle"></i> Perfil
         </a>
     </li>
+
     <li>
-        <a class="ft-manage-link @(ManageNavPages.EmailNavClass(ViewContext))" asp-page="./Email">
+        <a class="ft-manage-link @(ManageNavPages.EmailNavClass(ViewContext))"
+           asp-page="./Email">
             <i class="bi bi-envelope-at"></i> E-mail
         </a>
     </li>
+
     <li>
-        <a class="ft-manage-link @(ManageNavPages.ChangePasswordNavClass(ViewContext))" asp-page="./ChangePassword">
+        <a class="ft-manage-link @(ManageNavPages.ChangePasswordNavClass(ViewContext))"
+           asp-page="./ChangePassword">
             <i class="bi bi-key"></i> Senha
         </a>
     </li>
+
     @if (hasExternalLogins)
     {
         <li>
-            <a class="ft-manage-link @(ManageNavPages.ExternalLoginsNavClass(ViewContext))" asp-page="./ExternalLogins">
+            <a class="ft-manage-link @(ManageNavPages.ExternalLoginsNavClass(ViewContext))"
+               asp-page="./ExternalLogins">
                 <i class="bi bi-link-45deg"></i> Logins Externos
             </a>
         </li>
     }
+
     <li>
-        <a class="ft-manage-link @(ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext))" asp-page="./TwoFactorAuthentication">
+        <a class="ft-manage-link @(ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext))"
+           asp-page="./TwoFactorAuthentication">
             <i class="bi bi-shield-lock"></i> Autenticação 2FA
         </a>
     </li>
+
     <li>
-        <a class="ft-manage-link @(ManageNavPages.PersonalDataNavClass(ViewContext))" asp-page="./PersonalData">
+        <a class="ft-manage-link @(ManageNavPages.PersonalDataNavClass(ViewContext))"
+           asp-page="./PersonalData">
             <i class="bi bi-person-badge"></i> Dados Pessoais
         </a>
     </li>
+
 </ul>

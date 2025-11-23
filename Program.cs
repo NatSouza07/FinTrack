@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using FinTrack.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

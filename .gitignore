@@ -120,8 +120,6 @@ coverage/
 # Publish output
 /publish/
 
-/wwwroot/lib/
-
 # ASP.NET Identity scaffold leftovers
 Areas/**/Identity/ScaffoldedFiles/
 
