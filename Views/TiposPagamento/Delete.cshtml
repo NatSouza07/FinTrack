@@ -6,7 +6,7 @@
 
 <div class="ft-page-container">
 
-    <h2 class="fw-bold text-white mb-3">Excluir Tipo de Pagamento</h2>
+    <h2 class="fw-bold text-white mb-3 text-danger">Excluir Tipo de Pagamento</h2>
     <p class="text-secondary mb-4">Tem certeza que deseja excluir este tipo?</p>
 
     <div class="ft-card p-4">
@@ -16,14 +16,14 @@
             <input class="form-control" value="@Model.Nome" disabled />
         </div>
 
-        <form asp-action="DeleteConfirmed" method="post">
+        <form asp-action="Delete" method="post">
             <input type="hidden" asp-for="Id" />
 
             <div class="mt-4 d-flex gap-3">
                 <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
 
-                <button type="submit" class="btn btn-danger px-4">
-                    Excluir
+                <button type="submit" class="btn btn-danger px-4 fw-bold">
+                    Confirmar Exclusão
                 </button>
             </div>
         </form>

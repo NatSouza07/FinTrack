@@ -14,18 +14,17 @@
 
         <div class="ft-card p-4 mb-4">
             <form method="get">
-
                 <div class="row g-3">
 
                     <div class="col-md-3">
                         <label class="form-label text-white-50">Data Início</label>
-                        <input type="date" name="dataInicio" class="form-control"
+                        <input id="dataInicio" name="dataInicio" class="form-control flatpickr"
                                value="@Context.Request.Query["dataInicio"]" />
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label text-white-50">Data Fim</label>
-                        <input type="date" name="dataFim" class="form-control"
+                        <input id="dataFim" name="dataFim" class="form-control flatpickr"
                                value="@Context.Request.Query["dataFim"]" />
                     </div>
 
@@ -33,7 +32,6 @@
                         <label class="form-label text-white-50">Categoria</label>
                         <select name="categoriaId" class="form-select">
                             <option value="">Todas</option>
-
                             @{
                                 var categoriaAtual = Context.Request.Query["categoriaId"].ToString();
                                 foreach (var item in (SelectList)ViewBag.Categorias)
@@ -50,7 +48,6 @@
                         <label class="form-label text-white-50">Conta</label>
                         <select name="contaId" class="form-select">
                             <option value="">Todas</option>
-
                             @{
                                 var contaAtual = Context.Request.Query["contaId"].ToString();
                                 foreach (var item in (SelectList)ViewBag.Contas)
@@ -62,16 +59,13 @@
                             }
                         </select>
                     </div>
-
                 </div>
 
                 <div class="row g-3 mt-3">
-
                     <div class="col-md-3">
                         <label class="form-label text-white-50">Tipo Pagamento</label>
                         <select name="tipoPagamentoId" class="form-select">
                             <option value="">Todos</option>
-
                             @{
                                 var pagamentoAtual = Context.Request.Query["tipoPagamentoId"].ToString();
                                 foreach (var item in (SelectList)ViewBag.TiposPagamento)
@@ -107,17 +101,15 @@
                     <div class="col-md-3 d-flex align-items-end">
                         <a href="/Transacoes/Create"
                            class="btn fw-bold w-100"
-                           style="background: #ffd700; color: #000; border-radius: 10px;">
+                           style="background:#ffd700; color:#000; border-radius:10px;">
                             + Nova Transação
                         </a>
                     </div>
-
                 </div>
             </form>
         </div>
 
         <div class="ft-card p-3">
-
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="text-white-50">Listagem de Transações</span>
                 <span class="text-white-50">Total: <strong>@Model.Count()</strong></span>
@@ -172,6 +164,24 @@
 
     </div>
 </div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
+    <script>
+        flatpickr(".flatpickr", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            locale: "pt",
+            theme: "dark"
+        });
+    </script>
+}
 
 <style>
     .ft-card {

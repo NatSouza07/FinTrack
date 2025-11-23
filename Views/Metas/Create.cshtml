@@ -78,26 +78,6 @@
 
 </div>
 
-
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const moneyInputs = document.querySelectorAll(".money");
-
-            moneyInputs.forEach(input => {
-                new AutoNumeric(input, {
-                    digitGroupSeparator: ".",
-                    decimalCharacter: ",",
-                    decimalPlaces: 2,
-                    currencySymbol: "R$ ",
-                    currencySymbolPlacement: "p",
-                    unformatOnSubmit: true
-                });
-            });
-        });
-    </script>
-}
-
 <style>
     .ft-card {
         background: rgba(255, 255, 255, 0.04);

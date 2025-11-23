@@ -1,34 +1,97 @@
 ﻿@{
-    ViewData["Title"] = "Pivot";
+    ViewData["Title"] = "Tabela Pivot";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Pivot — Categorias × Mês</h2>
+<div class="ft-page-container">
 
-<table class="table table-striped" id="pivotTable">
-</table>
+    <h2 class="fw-bold text-white mb-3">Tabela Pivot</h2>
+    <p class="text-secondary mb-4">Valores agrupados por Categoria × Mês.</p>
 
-<script>
-    async function loadPivot() {
-        const ano = new Date().getFullYear();
-        const res = await fetch(`/Relatorios/Pivot?ano=${ano}`);
-        const dados = await res.json();
+    <div class="ft-card p-4">
 
-        let html = "<tr><th>Categoria</th>";
+        <div class="d-flex gap-3 mb-4">
+            <div>
+                <label class="text-white-50 mb-1">Ano</label>
+                <select id="yearSelect" class="form-select">
+                    @{
+                        var anoAtual = DateTime.Now.Year;
+                        for (int y = anoAtual - 3; y <= anoAtual + 1; y++)
+                        {
+                            <option value="@y" selected="@(y == anoAtual)">@y</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
 
-        for (let m = 1; m <= 12; m++)
-            html += `<th>${m}</th>`;
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle" id="pivotTable">
+            </table>
+        </div>
 
-        html += "</tr>";
+    </div>
 
-        dados.forEach(row => {
-            html += `<tr><td>${row.categoria}</td>`;
-            for (let m = 1; m <= 12; m++)
-                html += `<td>${row[`m${m}`]}</td>`;
-            html += "</tr>";
+</div>
+
+@section Scripts {
+    <script>
+        async function loadPivot() {
+            const ano = document.getElementById("yearSelect").value;
+            const res = await fetch(`/Relatorios/Pivot?ano=${ano}`);
+            const dados = await res.json();
+
+            let html = `
+                <thead>
+                    <tr class="text-warning">
+                        <th>Categoria</th>
+                        ${[...Array(12)].map((_, i) =>
+                            `<th>${new Date(0, i).toLocaleString('pt-BR', { month: 'short' })}</th>`
+                        ).join("")}
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            dados.forEach(row => {
+                html += `
+                    <tr>
+                        <td class="fw-bold">${row.categoria}</td>
+                        ${[...Array(12)].map((_, i) =>
+                            `<td>${Number(row[`m${i + 1}`]).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>`
+                        ).join("")}
+                    </tr>
+                `;
+            });
+
+            html += "</tbody>";
+
+            document.getElementById("pivotTable").innerHTML = html;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("yearSelect").addEventListener("change", loadPivot);
+            loadPivot();
         });
+    </script>
+}
 
-        document.getElementById("pivotTable").innerHTML = html;
+<style>
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
     }
 
-    loadPivot();
-</script>
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+</style>

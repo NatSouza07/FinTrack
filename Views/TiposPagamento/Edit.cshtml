@@ -10,7 +10,6 @@
     <p class="text-secondary mb-4">Atualize o nome do tipo de pagamento.</p>
 
     <div class="ft-card p-4">
-
         <form asp-action="Edit" method="post">
 
             <input type="hidden" asp-for="Id" />
@@ -31,12 +30,12 @@
             </div>
 
         </form>
-
     </div>
-
 </div>
 
-
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
 
 <style>
     .ft-card {
@@ -57,7 +56,3 @@
         margin: 0 auto;
     }
 </style>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

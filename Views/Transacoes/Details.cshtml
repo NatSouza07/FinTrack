@@ -47,16 +47,8 @@
 
         <div class="mt-4 d-flex gap-3">
             <a asp-action="Index" class="btn btn-secondary px-4">Voltar</a>
-
-            <a asp-action="Edit" asp-route-id="@Model.Id"
-               class="btn btn-primary px-4">
-                Editar
-            </a>
-
-            <a asp-action="Delete" asp-route-id="@Model.Id"
-               class="btn btn-danger px-4">
-                Excluir
-            </a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-4">Editar</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger px-4">Excluir</a>
         </div>
 
     </div>

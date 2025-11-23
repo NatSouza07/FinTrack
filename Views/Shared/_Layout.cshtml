@@ -14,8 +14,10 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/premium.css" asp-append-version="true" />
 
-    <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js"></script>
 </head>
 
 <body class="ft-body">
@@ -31,7 +33,6 @@
         </div>
 
         <ul class="ft-menu">
-
             <li class="ft-tooltip" data-title="Dashboard">
                 <a asp-controller="Home" asp-action="Index">
                     <i class="bi bi-speedometer2"></i><span>Dashboard</span>
@@ -67,7 +68,6 @@
                     <i class="bi bi-bullseye"></i><span>Metas</span>
                 </a>
             </li>
-
         </ul>
 
         <a asp-area="Identity" asp-page="/Account/Manage/Index" class="ft-profile-box">
@@ -97,7 +97,7 @@
     <div id="sidebar-spacer"></div>
 
     <div id="mainContent" class="ft-main-content">
-        <!-- GLOBAL ALERTS -->
+
         @if (TempData["Success"] != null)
         {
             <div class="alert alert-success alert-dismissible fade show ft-alert" role="alert">
@@ -124,6 +124,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
+
         @RenderBody()
     </div>
 
@@ -133,6 +134,35 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <!-- Flatpickr -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            if (window.AutoNumeric) {
+                AutoNumeric.multiple('.money', {
+                    digitGroupSeparator: ".",
+                    decimalCharacter: ",",
+                    decimalPlaces: 2,
+                    currencySymbol: "R$ ",
+                    currencySymbolPlacement: "p",
+                    unformatOnSubmit: true
+                });
+            }
+
+            if (window.flatpickr) {
+                flatpickr(".date-picker", {
+                    dateFormat: "d/m/Y",
+                    altInput: true,
+                    altFormat: "d/m/Y",
+                    locale: "pt"
+                });
+            }
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

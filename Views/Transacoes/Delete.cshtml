@@ -11,9 +11,7 @@
 
     <div class="ft-card p-4">
 
-        <h5 class="text-warning fw-bold mb-3">
-            Tem certeza que deseja excluir esta transação?
-        </h5>
+        <h5 class="text-warning fw-bold mb-3">Tem certeza que deseja excluir esta transação?</h5>
 
         <div class="mb-3">
             <label class="form-label text-white-50">Data</label>
@@ -49,17 +47,11 @@
 
         <hr class="border-secondary" />
 
-        <form asp-action="Delete">
+        <form asp-action="Delete" method="post">
             <input type="hidden" asp-for="Id" />
-
             <div class="mt-4 d-flex gap-3">
-                <a asp-action="Index" class="btn btn-secondary px-4">
-                    Cancelar
-                </a>
-
-                <button type="submit" class="btn btn-danger px-4">
-                    Excluir definitivamente
-                </button>
+                <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
+                <button type="submit" class="btn btn-danger px-4">Excluir definitivamente</button>
             </div>
         </form>
 

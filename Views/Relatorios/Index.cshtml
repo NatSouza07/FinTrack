@@ -8,34 +8,41 @@
     <p class="text-secondary mb-4">Visualize seus gráficos financeiros.</p>
 
     <div class="ft-card p-4 mb-4">
-        <div class="row g-3">
-            <div class="col-md-8">
-                <h5 class="text-white-50">Receitas x Despesas (por mês)</h5>
-                <canvas id="monthlyChart" height="120"></canvas>
+
+        <div class="row g-4">
+
+            <div class="col-lg-8">
+                <h5 class="text-white-50 mb-3">Receitas x Despesas (por mês)</h5>
+                <canvas id="monthlyChart" height="130"></canvas>
             </div>
 
-            <div class="col-md-4">
-                <h5 class="text-white-50">Por categoria (mês selecionado)</h5>
+            <div class="col-lg-4">
+                <h5 class="text-white-50 mb-3">Por categoria (mês selecionado)</h5>
+
                 <select id="monthSelect" class="form-select mb-3">
                     @for (int m = 1; m <= 12; m++)
                     {
-                        <option value="@m">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)</option>
+                        <option value="@m">
+                            @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)
+                        </option>
                     }
                 </select>
 
                 <select id="yearSelect" class="form-select mb-3">
                     @{
-                        var currentYear = System.DateTime.Now.Year;
-                        for (int y = currentYear; y >= currentYear - 2; y--)
+                        var yearNow = DateTime.Now.Year;
+                        for (int y = yearNow; y >= yearNow - 2; y--)
                         {
                             <option value="@y">@y</option>
                         }
                     }
                 </select>
 
-                <canvas id="categoryChart" height="240"></canvas>
+                <canvas id="categoryChart" height="260"></canvas>
             </div>
+
         </div>
+
     </div>
 </div>
 
@@ -49,7 +56,6 @@
         let monthlyChart = null;
         let categoryChart = null;
 
-        // cria gráfico de exemplo vazio
         function createMonthlyChart(labels, entradas, saidas) {
             if (monthlyChart) monthlyChart.destroy();
             monthlyChart = new Chart(monthlyCtx, {
@@ -57,8 +63,8 @@
                 data: {
                     labels,
                     datasets: [
-                        { label: 'Entradas', data: entradas, stack: 'stack1' },
-                        { label: 'Saídas', data: saidas, stack: 'stack1' }
+                        { label: 'Entradas', data: entradas, backgroundColor: 'rgba(60,255,120,0.8)', stack: 'stack1' },
+                        { label: 'Saídas', data: saidas, backgroundColor: 'rgba(255,80,80,0.8)', stack: 'stack1' }
                     ]
                 },
                 options: {
@@ -67,16 +73,21 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                                }
+                                callback: value => value.toLocaleString('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                })
                             }
                         }
                     },
                     plugins: {
+                        legend: { labels: { color: "#fff" } },
                         tooltip: {
                             callbacks: {
-                                label: ctx => ctx.raw.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                                label: ctx => ctx.raw.toLocaleString('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                })
                             }
                         }
                     }
@@ -92,16 +103,23 @@
                     labels,
                     datasets: [{
                         data,
-                        // cores padrão do Chart.js são ok
+                        backgroundColor: [
+                            '#ffd700', '#f5c400', '#e0af00', '#cc9c00',
+                            '#b88900', '#a67600', '#946300', '#825000'
+                        ]
                     }]
                 },
                 options: {
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                label: ctx => `${ctx.label}: ${ctx.raw.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+                                label: ctx => `${ctx.label}: ${ctx.raw.toLocaleString('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                })}`
                             }
-                        }
+                        },
+                        legend: { labels: { color: "#fff" } }
                     }
                 }
             });
@@ -110,40 +128,69 @@
         async function loadMonthly(year) {
             const res = await fetch(`/Relatorios/MonthlyTotalsJson?year=${year}`);
             const data = await res.json();
-            const labels = data.map(d => new Date(0, d.month - 1).toLocaleString('pt-BR', { month: 'short' }));
-            const entradas = data.map(d => Number(d.entrada));
-            const saidas = data.map(d => Number(d.saida));
-            createMonthlyChart(labels, entradas, saidas);
+            const labels = data.map(d =>
+                new Date(0, d.month - 1).toLocaleString('pt-BR', { month: 'short' })
+            );
+            createMonthlyChart(
+                labels,
+                data.map(d => Number(d.entrada)),
+                data.map(d => Number(d.saida))
+            );
         }
 
         async function loadCategory(year, month) {
             const res = await fetch(`/Relatorios/CategoryTotalsJson?year=${year}&month=${month}`);
             const data = await res.json();
-            const labels = data.map(d => d.categoria);
-            const values = data.map(d => Number(d.total));
-            createCategoryChart(labels, values);
+            createCategoryChart(
+                data.map(d => d.categoria),
+                data.map(d => Number(d.total))
+            );
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const currentYear = new Date().getFullYear();
-            document.getElementById('yearSelect').value = currentYear;
-            document.getElementById('monthSelect').value = new Date().getMonth() + 1;
+        document.addEventListener("DOMContentLoaded", () => {
+            const yearNow = new Date().getFullYear();
+            const monthNow = new Date().getMonth() + 1;
 
-            loadMonthly(currentYear);
-            loadCategory(currentYear, new Date().getMonth() + 1);
+            document.getElementById("yearSelect").value = yearNow;
+            document.getElementById("monthSelect").value = monthNow;
 
-            document.getElementById('monthSelect').addEventListener('change', function () {
-                const month = this.value;
-                const year = document.getElementById('yearSelect').value;
-                loadCategory(year, month);
+            loadMonthly(yearNow);
+            loadCategory(yearNow, monthNow);
+
+            document.getElementById("monthSelect").addEventListener("change", () => {
+                loadCategory(
+                    document.getElementById("yearSelect").value,
+                    document.getElementById("monthSelect").value
+                );
             });
 
-            document.getElementById('yearSelect').addEventListener('change', function () {
-                const year = this.value;
-                loadMonthly(year);
-                const month = document.getElementById('monthSelect').value;
-                loadCategory(year, month);
+            document.getElementById("yearSelect").addEventListener("change", () => {
+                loadMonthly(document.getElementById("yearSelect").value);
+                loadCategory(
+                    document.getElementById("yearSelect").value,
+                    document.getElementById("monthSelect").value
+                );
             });
         });
     </script>
 }
+
+<style>
+    .ft-page-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .ft-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+</style>
