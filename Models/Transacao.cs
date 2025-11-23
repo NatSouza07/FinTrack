@@ -36,7 +36,9 @@ namespace FinTrack.Models
         public enum TipoTransacao
         {
             Entrada = 1,
-            Saída = 2
+            Saída = 2,
+            Despesa = 3,
+            Saida = 4
         }
 
     }

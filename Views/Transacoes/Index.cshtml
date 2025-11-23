@@ -156,7 +156,7 @@
                                 <td>@t.TipoPagamento.Nome</td>
                                 <td>@t.Tipo</td>
                                 <td class="fw-bold @(t.Tipo == Transacao.TipoTransacao.Entrada ? "text-success" : "text-danger")">
-                                    @t.Valor.ToString("C2")
+                                    @t.Valor.ToString("C")
                                 </td>
                                 <td class="text-center">
                                     <a class="btn btn-sm btn-secondary" href="/Transacoes/Details/@t.Id">Ver</a>

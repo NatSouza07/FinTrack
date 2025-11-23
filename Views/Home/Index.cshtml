@@ -1,8 +1,165 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
+    Layout = "_Layout"; // assume seu layout salvo em Views/Shared/_Layout.cshtml (o código que você enviou)
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-4">
+
+    <h2 class="mb-4">Dashboard Financeiro</h2>
+
+    <!-- ROW DOS CARDS -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Entradas (mês)</div>
+                <div class="card-body">
+                    <h3 id="cardEntradas">R$ 0,00</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">Saídas (mês)</div>
+                <div class="card-body">
+                    <h3 id="cardSaidas">R$ 0,00</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Saldo (mês)</div>
+                <div class="card-body">
+                    <h3 id="cardSaldo">R$ 0,00</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- GRAFICOS -->
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">Gastos por Categoria (mês atual)</div>
+                <div class="card-body">
+                    <canvas id="pieCategories"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">Total por Mês (ano atual)</div>
+                <div class="card-body">
+                    <canvas id="barMonthly"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+@section Scripts {
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        (function () {
+            // Utils
+            function formatCurrency(value) {
+                return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+            }
+
+            async function loadDashboard() {
+                try {
+                    const ano = new Date().getFullYear();
+                    const urlTotais = `/Relatorios/MensalJson?ano=${ano}`;
+
+                    // 1) Busca totais mensais (array 12)
+                    const resTotais = await fetch(urlTotais);
+                    if (!resTotais.ok) throw new Error("Erro ao obter totais mensais");
+                    const totais = await resTotais.json();
+
+                    let entradas = 0;
+                    let saidas = 0;
+
+                    totais.forEach(mes => {
+                        if (mes > 0) entradas += mes;
+                        if (mes < 0) saidas += mes;
+                    });
+
+                    const saldo = entradas + saidas;
+
+                    document.getElementById("cardEntradas").innerText = formatCurrency(entradas);
+                    document.getElementById("cardSaidas").innerText = formatCurrency(saidas);
+                    document.getElementById("cardSaldo").innerText = formatCurrency(saldo);
+
+                    // 2) Pie: categorias do mês atual
+                    const now = new Date();
+                    const inicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+                    const fim = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+
+                    const urlCategorias = `/Relatorios/CategoriasJson?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`;
+                    const resCat = await fetch(urlCategorias);
+                    if (!resCat.ok) throw new Error("Erro ao obter categorias");
+                    const categorias = await resCat.json();
+
+                    // Caso não haja categorias, evita crash
+                    const labels = categorias.labels && categorias.labels.length ? categorias.labels : ["Sem dados"];
+                    const dataCat = categorias.data && categorias.data.length ? categorias.data : [0];
+
+                    const pieCtx = document.getElementById("pieCategories").getContext("2d");
+                    new Chart(pieCtx, {
+                        type: "pie",
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: dataCat,
+                                backgroundColor: labels.map((_, i) => `hsl(${(i*45)%360} 70% 60%)`)
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { position: "bottom" }
+                            }
+                        }
+                    });
+
+                    // 3) Bar: totais mensais
+                    const barCtx = document.getElementById("barMonthly").getContext("2d");
+                    new Chart(barCtx, {
+                        type: "bar",
+                        data: {
+                            labels: ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
+                            datasets: [{
+                                label: "Total por Mês",
+                                data: totais,
+                                // cor automática simples:
+                                backgroundColor: totais.map(v => v < 0 ? "rgba(220,53,69,0.8)" : "rgba(0,123,255,0.8)")
+                            }]
+                        },
+                        options: {
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            // inicializa
+            document.addEventListener("DOMContentLoaded", loadDashboard);
+        })();
+    </script>
+}

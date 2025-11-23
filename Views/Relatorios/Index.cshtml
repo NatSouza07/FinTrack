@@ -1,61 +1,149 @@
 ﻿@{
     ViewData["Title"] = "Relatórios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Relatórios</h2>
+<div class="ft-page-container">
+    <h2 class="fw-bold text-white mb-3">Relatórios</h2>
+    <p class="text-secondary mb-4">Visualize seus gráficos financeiros.</p>
 
-<div class="row">
-    <div class="col-md-6">
-        <h4>Resumo Mensal</h4>
-        <canvas id="mensalChart"></canvas>
-    </div>
+    <div class="ft-card p-4 mb-4">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <h5 class="text-white-50">Receitas x Despesas (por mês)</h5>
+                <canvas id="monthlyChart" height="120"></canvas>
+            </div>
 
-    <div class="col-md-6">
-        <h4>Por Categoria</h4>
-        <input type="date" id="inicio" />
-        <input type="date" id="fim" />
-        <button class="btn btn-primary" onclick="loadCategorias()">Filtrar</button>
-        <canvas id="categoriasChart"></canvas>
+            <div class="col-md-4">
+                <h5 class="text-white-50">Por categoria (mês selecionado)</h5>
+                <select id="monthSelect" class="form-select mb-3">
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        <option value="@m">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)</option>
+                    }
+                </select>
+
+                <select id="yearSelect" class="form-select mb-3">
+                    @{
+                        var currentYear = System.DateTime.Now.Year;
+                        for (int y = currentYear; y >= currentYear - 2; y--)
+                        {
+                            <option value="@y">@y</option>
+                        }
+                    }
+                </select>
+
+                <canvas id="categoryChart" height="240"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-    async function loadMensal() {
-        const ano = new Date().getFullYear();
-        const res = await fetch(`/Relatorios/MensalJson?ano=${ano}`);
-        const dados = await res.json();
+    <script>
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
 
-        new Chart(document.getElementById("mensalChart"), {
-            type: "bar",
-            data: {
-                labels: ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
-                datasets: [{
-                    label: "Total",
-                    data: dados
-                }]
-            }
+        let monthlyChart = null;
+        let categoryChart = null;
+
+        // cria gráfico de exemplo vazio
+        function createMonthlyChart(labels, entradas, saidas) {
+            if (monthlyChart) monthlyChart.destroy();
+            monthlyChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Entradas', data: entradas, stack: 'stack1' },
+                        { label: 'Saídas', data: saidas, stack: 'stack1' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.raw.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCategoryChart(labels, data) {
+            if (categoryChart) categoryChart.destroy();
+            categoryChart = new Chart(categoryCtx, {
+                type: 'pie',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        // cores padrão do Chart.js são ok
+                    }]
+                },
+                options: {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.label}: ${ctx.raw.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadMonthly(year) {
+            const res = await fetch(`/Relatorios/MonthlyTotalsJson?year=${year}`);
+            const data = await res.json();
+            const labels = data.map(d => new Date(0, d.month - 1).toLocaleString('pt-BR', { month: 'short' }));
+            const entradas = data.map(d => Number(d.entrada));
+            const saidas = data.map(d => Number(d.saida));
+            createMonthlyChart(labels, entradas, saidas);
+        }
+
+        async function loadCategory(year, month) {
+            const res = await fetch(`/Relatorios/CategoryTotalsJson?year=${year}&month=${month}`);
+            const data = await res.json();
+            const labels = data.map(d => d.categoria);
+            const values = data.map(d => Number(d.total));
+            createCategoryChart(labels, values);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentYear = new Date().getFullYear();
+            document.getElementById('yearSelect').value = currentYear;
+            document.getElementById('monthSelect').value = new Date().getMonth() + 1;
+
+            loadMonthly(currentYear);
+            loadCategory(currentYear, new Date().getMonth() + 1);
+
+            document.getElementById('monthSelect').addEventListener('change', function () {
+                const month = this.value;
+                const year = document.getElementById('yearSelect').value;
+                loadCategory(year, month);
+            });
+
+            document.getElementById('yearSelect').addEventListener('change', function () {
+                const year = this.value;
+                loadMonthly(year);
+                const month = document.getElementById('monthSelect').value;
+                loadCategory(year, month);
+            });
         });
-    }
-
-    async function loadCategorias() {
-        const inicio = document.getElementById("inicio").value;
-        const fim = document.getElementById("fim").value;
-
-        const res = await fetch(`/Relatorios/CategoriasJson?inicio=${inicio}&fim=${fim}`);
-        const dados = await res.json();
-
-        new Chart(document.getElementById("categoriasChart"), {
-            type: "pie",
-            data: {
-                labels: dados.map(x => x.label),
-                datasets: [{
-                    data: dados.map(x => x.value)
-                }]
-            }
-        });
-    }
-
-    loadMensal();
-</script>
+    </script>
+}

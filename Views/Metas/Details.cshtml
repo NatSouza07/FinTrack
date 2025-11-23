@@ -1,7 +1,19 @@
 ﻿@model FinTrack.Models.Meta
+@using System.Globalization
 @{
     ViewData["Title"] = "Detalhes da Meta";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var monthNames = CultureInfo.CurrentCulture.DateTimeFormat;
+    var monthShort = monthNames.GetAbbreviatedMonthName(Math.Clamp(Model.Mes, 1, 12));
+
+    var valorMetaText = Model.ValorMeta.ToString("C");
+    var progressoText = Model.ProgressoCalculado.ToString("C");
+
+    var pct = Math.Clamp(Model.Porcentagem, 0, 100);
+    var barClass = pct >= 70 ? "ft-progress-green"
+                : pct >= 30 ? "ft-progress-blue"
+                : "ft-progress-red";
 }
 
 <div class="ft-page-container">
@@ -9,36 +21,42 @@
     <p class="text-secondary mb-4">Visualize o progresso e os dados da meta.</p>
 
     <div class="ft-card p-4">
+
         <dl class="row">
             <dt class="col-sm-3 text-white-50">Mês / Ano</dt>
-            <dd class="col-sm-9">@Model.Mes / @Model.Ano</dd>
+            <dd class="col-sm-9">@monthShort / @Model.Ano</dd>
 
             <dt class="col-sm-3 text-white-50">Valor da Meta</dt>
-            <dd class="col-sm-9">@Model.ValorMeta.ToString("C2")</dd>
+            <dd class="col-sm-9">@valorMetaText</dd>
 
             <dt class="col-sm-3 text-white-50">Progresso</dt>
-            <dd class="col-sm-9">@Model.ProgressoCalculado.ToString("C2") (@Model.Porcentagem%)</dd>
+            <dd class="col-sm-9">@progressoText (@pct%)</dd>
         </dl>
 
-        @{
-            var pct = Model.Porcentagem;
-            var barClass = pct >= 70 ? "ft-progress-green" : (pct >= 30 ? "ft-progress-blue" : "ft-progress-red");
-        }
         <div class="mb-3">
             <div class="d-flex justify-content-between mb-1 small text-white-50">
                 <div>Meta alcançada</div>
                 <div><strong>@pct%</strong></div>
             </div>
-            <div class="progress" style="height:14px; background: rgba(255,255,255,0.04); border-radius:8px;">
-                <div class="progress-bar @barClass" role="progressbar" style="width:@pct%; transition: width 1s ease;"
-                     aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100"></div>
+
+            <div class="progress"
+                 style="height:14px; background: rgba(255,255,255,0.04); border-radius:8px;">
+                <div class="progress-bar @barClass"
+                     role="progressbar"
+                     style="width:@pct%; transition: width 1s ease;"
+                     aria-valuenow="@pct"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-valuetext="@($"{pct}% — {progressoText} de {valorMetaText}")">
+                </div>
             </div>
         </div>
 
-        <div class="mt-3">
-            <a asp-action="Index" class="btn btn-secondary">Voltar</a>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+        <div class="mt-4 d-flex gap-3">
+            <a asp-action="Index" class="btn btn-secondary px-4">Voltar</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-4">Editar</a>
         </div>
+
     </div>
 </div>
 
@@ -48,6 +66,18 @@
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         backdrop-filter: blur(12px);
+    }
+
+    .ft-progress-green {
+        background: linear-gradient(90deg,#3ad76a,#2bb06a);
+    }
+
+    .ft-progress-blue {
+        background: linear-gradient(90deg,#3ea5ff,#2b8bff);
+    }
+
+    .ft-progress-red {
+        background: linear-gradient(90deg,#ff6b6b,#e64545);
     }
 
     .ft-main-content {

@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Relatório por Categoria";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Agrupamento por Categoria</h2>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Categoria</th>
+                <th>Total (R$)</th>
+                <th>%</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Categoria</td>
+                    <td>@item.Total.ToString("C")</td>
+                    <td>@item.Porcentagem %</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

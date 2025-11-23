@@ -1,0 +1,34 @@
+﻿@using System.Globalization
+@{
+    ViewData["Title"] = "Relatório Pivot";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Tabela Pivot por Categoria × Meses</h2>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Categoria</th>
+                @for (int m = 1; m <= 12; m++)
+                {
+                    <th>@CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m)</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var linha in Model)
+            {
+                <tr>
+                    <td>@linha.Key</td>
+                    @for (int i = 0; i < 12; i++)
+                    {
+                        <td>@linha.Value[i].ToString("C")</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

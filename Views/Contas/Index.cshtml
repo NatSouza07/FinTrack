@@ -41,7 +41,7 @@
                     {
                         <tr>
                             <td>@conta.Nome</td>
-                            <td class="fw-bold">@conta.SaldoInicial.ToString("C2")</td>
+                            <td class="fw-bold">@conta.SaldoInicial.ToString("C")</td>
                             <td class="text-center">
                                 <a asp-action="Details" asp-route-id="@conta.Id" class="btn btn-sm btn-secondary">Ver</a>
                                 <a asp-action="Edit" asp-route-id="@conta.Id" class="btn btn-sm btn-primary">Editar</a>

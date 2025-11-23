@@ -39,8 +39,7 @@
     </div>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -80,3 +79,38 @@
         margin: 0 auto;
     }
 </style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.AutoNumeric) {
+                AutoNumeric.multiple('.ft-money', {
+                    digitGroupSeparator: ".",
+                    decimalCharacter: ",",
+                    decimalPlaces: 2,
+                    currencySymbol: "R$ ",
+                    currencySymbolPlacement: "p"
+                });
+            }
+
+            const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"], form');
+            if (form) {
+                form.addEventListener('submit', function () {
+                    document.querySelectorAll('.ft-money').forEach(function (el) {
+                        if (!el) return;
+                        let v = el.value ?? '';
+                        v = v.replace(/\s/g, '');
+                        v = v.replace(/R\$|r\$/g, '');
+                        v = v.replace(/\./g, ''); // remove milhar
+                        // NÃO trocar vírgula por ponto (pt-BR)
+                        el.value = v;
+                    });
+                }, { once: false });
+            }
+        });
+    </script>
+}
+
+
