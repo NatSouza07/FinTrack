@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using FinTrack.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +63,8 @@ builder.Services.Configure<RequestLocalizationOptions>(opts =>
 builder.Services.AddLocalization();
 
 builder.Services.AddScoped<AccountService>();
+
+builder.Services.AddTransient<IEmailSender, ConsoleEmailSender>();
 
 var app = builder.Build();
 
