@@ -12,12 +12,18 @@ namespace FinTrack.Data
 
             var context = scope.ServiceProvider.GetRequiredService<FinTrackContext>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
-            RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             if (context.Database.GetPendingMigrations().Any())
             {
                 context.Database.Migrate();
             }
+
+            if (!await roleManager.RoleExistsAsync("Admin"))
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+            if (!await roleManager.RoleExistsAsync("User"))
+                await roleManager.CreateAsync(new IdentityRole("User"));
 
             string adminEmail = "admin@fintrack.com";
             string adminPassword = "Admin123!";
@@ -37,15 +43,8 @@ namespace FinTrack.Data
                 await userManager.CreateAsync(adminUser, adminPassword);
             }
 
-            if (!await roleManager.RoleExistsAsync("Admin"))
-            {
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
-            }
-
             if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-            {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
-            }
 
             if (!context.Categorias.Any())
             {

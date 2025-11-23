@@ -4,6 +4,10 @@ using FinTrack.Models;
 using FinTrack.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +22,18 @@ builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
     options.SignIn.RequireConfirmedAccount = true;
     options.SignIn.RequireConfirmedEmail = false;
     options.User.RequireUniqueEmail = true;
+
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 })
 .AddEntityFrameworkStores<FinTrackContext>()
 .AddDefaultTokenProviders()
@@ -33,8 +49,14 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 var culture = new CultureInfo("pt-BR");
-CultureInfo.DefaultThreadCurrentCulture = culture;
-CultureInfo.DefaultThreadCurrentUICulture = culture;
+var supportedCultures = new[] { culture };
+
+builder.Services.Configure<RequestLocalizationOptions>(opts =>
+{
+    opts.DefaultRequestCulture = new RequestCulture(culture);
+    opts.SupportedCultures = supportedCultures;
+    opts.SupportedUICultures = supportedCultures;
+});
 
 builder.Services.AddLocalization();
 
@@ -42,7 +64,7 @@ builder.Services.AddScoped<AccountService>();
 
 var app = builder.Build();
 
-app.UseRequestLocalization();
+app.UseRequestLocalization(app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value);
 
 if (!app.Environment.IsDevelopment())
 {
