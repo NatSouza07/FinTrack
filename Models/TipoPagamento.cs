@@ -7,7 +7,7 @@ namespace FinTrack.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "O nome do tipo de pagamento é obrigatório.")]
-        [StringLength(50)]
+        [StringLength(50, MinimumLength = 2)]
         public string Nome { get; set; } = string.Empty;
     }
 }

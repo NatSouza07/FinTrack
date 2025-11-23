@@ -7,7 +7,7 @@ namespace FinTrack.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "O nome da categoria é obrigatório.")]
-        [StringLength(100)]
+        [StringLength(100, MinimumLength = 2)]
         public string Nome { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O tipo da categoria é obrigatório.")]

@@ -16,100 +16,150 @@ namespace FinTrack.Controllers
             _context = context;
         }
 
-        // INDEX
         public async Task<IActionResult> Index()
         {
             var tipos = await _context.TiposPagamento.ToListAsync();
             return View(tipos);
         }
 
-        // DETAILS
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Tipo de pagamento inválido.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var tipo = await _context.TiposPagamento.FirstOrDefaultAsync(t => t.Id == id);
 
-            if (tipo == null) return NotFound();
+            if (tipo == null)
+            {
+                TempData["Error"] = "Tipo de pagamento não encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(tipo);
         }
-
-        // CREATE (GET)
 
         public IActionResult Create()
         {
             return View();
         }
 
-        // CREATE (POST)
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TipoPagamento tipo)
         {
             if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Preencha os campos corretamente.";
                 return View(tipo);
+            }
 
-            _context.TiposPagamento.Add(tipo);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                _context.TiposPagamento.Add(tipo);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Tipo de pagamento criado com sucesso!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao criar o tipo de pagamento.";
+                return View(tipo);
+            }
         }
-
-        // EDIT GET()
 
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "ID inválido.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var tipo = await _context.TiposPagamento.FindAsync(id);
-            if (tipo == null) return NotFound();
+
+            if (tipo == null)
+            {
+                TempData["Error"] = "Tipo de pagamento não encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(tipo);
         }
-
-        // EDIT (POST)
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, TipoPagamento tipo)
         {
             if (id != tipo.Id)
-                return NotFound();
+            {
+                TempData["Error"] = "ID inconsistente.";
+                return RedirectToAction(nameof(Index));
+            }
 
             if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Preencha os campos corretamente.";
                 return View(tipo);
+            }
 
-            _context.Update(tipo);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                _context.Update(tipo);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Tipo de pagamento atualizado!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao atualizar o tipo de pagamento.";
+                return View(tipo);
+            }
         }
-
-        // DELETE (GET)
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "ID inválido.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var tipo = await _context.TiposPagamento.FirstOrDefaultAsync(t => t.Id == id);
-            if (tipo == null) return NotFound();
+
+            if (tipo == null)
+            {
+                TempData["Error"] = "Tipo de pagamento não encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(tipo);
         }
-
-        // DELETE (POST)
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var tipo = await _context.TiposPagamento.FindAsync(id);
-            if (tipo == null) return NotFound();
 
-            _context.TiposPagamento.Remove(tipo);
-            await _context.SaveChangesAsync();
+            if (tipo == null)
+            {
+                TempData["Error"] = "O tipo de pagamento não existe.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                _context.TiposPagamento.Remove(tipo);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Tipo de pagamento removido com sucesso!";
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao remover o tipo de pagamento.";
+            }
 
             return RedirectToAction(nameof(Index));
         }

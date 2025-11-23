@@ -11,10 +11,12 @@ namespace FinTrack.Models
         public TipoTransacao Tipo { get; set; }
 
         [Required(ErrorMessage = "O valor da transação é obrigatório.")]
+        [Range(0.01, 9999999, ErrorMessage = "O valor deve ser maior que zero.")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Valor { get; set; }
 
-        [Required(ErrorMessage = "A data da transação é obrigatória.")]
+        [Required]
+        [DataType(DataType.Date)]
         public DateTime Data { get; set; } = DateTime.Now;
 
         [Required]
@@ -32,13 +34,10 @@ namespace FinTrack.Models
         [Required]
         public string UsuarioId { get; set; } = string.Empty;
         public Usuario Usuario { get; set; } = null!;
-
         public enum TipoTransacao
         {
             Entrada = 1,
-            Saída = 2,
-            Despesa = 3,
-            Saida = 4
+            Saida = 2
         }
 
     }

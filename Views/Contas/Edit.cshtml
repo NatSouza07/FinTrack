@@ -23,44 +23,22 @@
 
             <div class="mb-3">
                 <label asp-for="SaldoInicial" class="form-label text-white-50"></label>
-                <input asp-for="SaldoInicial" class="form-control money" inputmode="numeric" />
+                <input asp-for="SaldoInicial" class="form-control ft-money" inputmode="numeric" />
                 <span asp-validation-for="SaldoInicial" class="text-danger"></span>
             </div>
 
             <div class="mt-4 d-flex gap-3">
-                <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
+                <a asp-action="Index" class="btn ft-btn-secondary px-4">Cancelar</a>
 
-                <button type="submit"
-                        class="btn fw-bold px-4"
-                        style="background:#ffd700; color:#000; border-radius:10px;">
+                <button type="submit" class="btn ft-btn-primary fw-bold px-4">
                     Salvar Alterações
                 </button>
             </div>
 
         </form>
+
     </div>
 </div>
-
-
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const moneyInputs = document.querySelectorAll(".money");
-
-            moneyInputs.forEach(input => {
-                new AutoNumeric(input, {
-                    digitGroupSeparator: ".",
-                    decimalCharacter: ",",
-                    decimalPlaces: 2,
-                    currencySymbol: "R$ ",
-                    currencySymbolPlacement: "p",
-                    unformatOnSubmit: true
-                });
-            });
-        });
-    </script>
-}
-
 
 <style>
     .ft-card {
@@ -68,12 +46,6 @@
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         backdrop-filter: blur(12px);
-    }
-
-    .ft-main-content {
-        background: #1e1e1e !important;
-        padding: 40px !important;
-        min-height: 100vh;
     }
 
     .ft-page-container {
@@ -87,6 +59,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
             if (window.AutoNumeric) {
                 AutoNumeric.multiple('.ft-money', {
                     digitGroupSeparator: ".",
@@ -97,19 +70,17 @@
                 });
             }
 
-            const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"], form');
+            const form = document.querySelector("form");
             if (form) {
-                form.addEventListener('submit', function () {
-                    document.querySelectorAll('.ft-money').forEach(function (el) {
-                        if (!el) return;
-                        let v = el.value ?? '';
-                        v = v.replace(/\s/g, '');
-                        v = v.replace(/R\$|r\$/g, '');
-                        v = v.replace(/\./g, ''); // remove milhar
-                        // NÃO trocar vírgula por ponto (pt-BR)
+                form.addEventListener("submit", function () {
+                    document.querySelectorAll(".ft-money").forEach(el => {
+                        let v = el.value ?? "";
+                        v = v.replace(/\s/g, "");
+                        v = v.replace(/R\$|r\$/gi, "");
+                        v = v.replace(/\./g, "");
                         el.value = v;
                     });
-                }, { once: false });
+                });
             }
         });
     </script>

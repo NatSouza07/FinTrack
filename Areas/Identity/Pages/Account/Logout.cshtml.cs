@@ -1,7 +1,5 @@
-#nullable disable
 using FinTrack.Models;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -23,12 +21,11 @@ namespace FinTrack.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out.");
 
             if (returnUrl != null)
                 return LocalRedirect(returnUrl);
 
-            return RedirectToPage();
+            return RedirectToPage("/Account/Login");
         }
     }
 }

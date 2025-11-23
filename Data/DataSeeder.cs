@@ -14,7 +14,10 @@ namespace FinTrack.Data
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
             RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            context.Database.Migrate();
+            if (context.Database.GetPendingMigrations().Any())
+            {
+                context.Database.Migrate();
+            }
 
             string adminEmail = "admin@fintrack.com";
             string adminPassword = "Admin123!";

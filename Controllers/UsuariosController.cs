@@ -6,14 +6,18 @@ using Microsoft.AspNetCore.Mvc;
 namespace FinTrack.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class UsuariosController(
-        UserManager<Usuario> userManager,
-        RoleManager<IdentityRole> roleManager) : Controller
+    public class UsuariosController : Controller
     {
-        private readonly UserManager<Usuario> _userManager = userManager;
-        private readonly RoleManager<IdentityRole> _roleManager = roleManager;
+        private readonly UserManager<Usuario> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        // INDEX
+        public UsuariosController(
+            UserManager<Usuario> userManager,
+            RoleManager<IdentityRole> roleManager)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
 
         public IActionResult Index()
         {
@@ -21,76 +25,114 @@ namespace FinTrack.Controllers
             return View(usuarios);
         }
 
-
-        // EDIT - GET
-
         public async Task<IActionResult> Edit(string id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Usuário não encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var usuario = await _userManager.FindByIdAsync(id);
-            if (usuario == null) return NotFound();
 
-            var roles = _roleManager.Roles.Select(r => r.Name).ToList();
-            var userRoles = await _userManager.GetRolesAsync(usuario);
+            if (usuario == null)
+            {
+                TempData["Error"] = "O usuário informado não existe.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            ViewBag.Roles = roles;
-            ViewBag.UserRole = userRoles.FirstOrDefault();
+            ViewBag.Roles = _roleManager.Roles.Select(r => r.Name).ToList();
+            ViewBag.UserRole = (await _userManager.GetRolesAsync(usuario)).FirstOrDefault();
 
             return View(usuario);
         }
-
-
-        // EDIT - POST
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, string nomeCompleto, string role)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Usuário inválido.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var usuario = await _userManager.FindByIdAsync(id);
-            if (usuario == null) return NotFound();
 
-            usuario.NomeCompleto = nomeCompleto;
-            await _userManager.UpdateAsync(usuario);
+            if (usuario == null)
+            {
+                TempData["Error"] = "Usuário não encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            var userRoles = await _userManager.GetRolesAsync(usuario);
-            await _userManager.RemoveFromRolesAsync(usuario, userRoles);
+            try
+            {
+                usuario.NomeCompleto = nomeCompleto;
+                await _userManager.UpdateAsync(usuario);
 
-            if (!string.IsNullOrEmpty(role))
-                await _userManager.AddToRoleAsync(usuario, role);
+                var rolesAtuais = await _userManager.GetRolesAsync(usuario);
+                await _userManager.RemoveFromRolesAsync(usuario, rolesAtuais);
+
+                if (!string.IsNullOrEmpty(role))
+                    await _userManager.AddToRoleAsync(usuario, role);
+
+                TempData["Success"] = "Usuário atualizado com sucesso!";
+            }
+            catch
+            {
+                TempData["Error"] = "Ocorreu um erro ao atualizar o usuário.";
+            }
 
             return RedirectToAction(nameof(Index));
         }
 
-        // DELETE - GET
-
         public async Task<IActionResult> Delete(string id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Usuário inválido.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var usuario = await _userManager.FindByIdAsync(id);
-            if (usuario == null) return NotFound();
+
+            if (usuario == null)
+            {
+                TempData["Error"] = "Usuário não encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(usuario);
         }
-
-        // DELETE - POST
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var usuario = await _userManager.FindByIdAsync(id);
-            if (usuario == null) return NotFound();
 
-            // impedir apagar o admin principal
+            if (usuario == null)
+            {
+                TempData["Error"] = "Usuário não encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var email = usuario.Email?.ToLower();
             if (email == "admin@fintrack.com")
-                return Forbid();
+            {
+                TempData["Warning"] = "O administrador principal não pode ser excluído.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            await _userManager.DeleteAsync(usuario);
+            try
+            {
+                await _userManager.DeleteAsync(usuario);
+                TempData["Success"] = "Usuário removido com sucesso!";
+            }
+            catch
+            {
+                TempData["Error"] = "Não foi possível excluir o usuário.";
+            }
 
             return RedirectToAction(nameof(Index));
         }

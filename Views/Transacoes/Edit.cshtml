@@ -102,17 +102,15 @@
                 });
             }
 
-            // Antes do submit, limpamos R$ e pontos de milhar, mantendo a vírgula (pt-BR)
             const form = document.querySelector('form[asp-action="Create"], form[asp-action="Edit"], form');
             if (form) {
                 form.addEventListener('submit', function () {
                     document.querySelectorAll('.ft-money').forEach(function (el) {
                         if (!el) return;
                         let v = el.value ?? '';
-                        v = v.replace(/\s/g, '');            // remove espaços
-                        v = v.replace(/R\$|r\$/g, '');       // remove símbolo R$
-                        v = v.replace(/\./g, '');            // remove separador de milhar
-                        // NÃO trocar vírgula por ponto — model binder pt-BR espera "1234,56"
+                        v = v.replace(/\s/g, '');
+                        v = v.replace(/R\$|r\$/g, '');
+                        v = v.replace(/\./g, '');
                         el.value = v;
                     });
                 }, { once: false });

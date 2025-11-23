@@ -1,11 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
 using FinTrack.Models;
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
+using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,9 +14,8 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<Usuario> _userManager;
         private readonly SignInManager<Usuario> _signInManager;
 
-        public IndexModel(
-            UserManager<Usuario> userManager,
-            SignInManager<Usuario> signInManager)
+        public IndexModel(UserManager<Usuario> userManager,
+                          SignInManager<Usuario> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -35,21 +31,23 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+            [StringLength(50)]
+            public string Nickname { get; set; }
+
             [Phone]
-            [Display(Name = "Número de telefone")]
             public string PhoneNumber { get; set; }
+
+            public IFormFile FotoPerfil { get; set; }
         }
 
         private async Task LoadAsync(Usuario user)
         {
-            var userName = await _userManager.GetUserNameAsync(user);
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-
-            Username = userName;
+            Username = user.Email;
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = user.PhoneNumber,
+                Nickname = user.Nickname
             };
         }
 
@@ -57,9 +55,7 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-            {
-                return NotFound($"Não foi possível carregar o usuário com ID '{_userManager.GetUserId(User)}'.");
-            }
+                return NotFound();
 
             await LoadAsync(user);
             return Page();
@@ -69,9 +65,7 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-            {
-                return NotFound($"Não foi possível carregar o usuário com ID '{_userManager.GetUserId(User)}'.");
-            }
+                return NotFound();
 
             if (!ModelState.IsValid)
             {
@@ -79,20 +73,29 @@ namespace FinTrack.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            if (Input.Nickname != user.Nickname)
+                user.Nickname = Input.Nickname;
 
-            if (Input.PhoneNumber != phoneNumber)
+            if (Input.PhoneNumber != user.PhoneNumber)
+                user.PhoneNumber = Input.PhoneNumber;
+
+            if (Input.FotoPerfil != null)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
-                {
-                    StatusMessage = "Ocorreu um erro inesperado ao tentar atualizar o número de telefone.";
-                    return RedirectToPage();
-                }
+                var fileName = $"{user.Id}.png";
+                var folder = Path.Combine("wwwroot", "img", "perfis");
+                Directory.CreateDirectory(folder);
+
+                var path = Path.Combine(folder, fileName);
+                using var stream = new FileStream(path, FileMode.Create);
+                await Input.FotoPerfil.CopyToAsync(stream);
+
+                user.FotoPerfil = $"/img/perfis/{fileName}";
             }
 
+            await _userManager.UpdateAsync(user);
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Seu perfil foi atualizado com sucesso!";
+
+            StatusMessage = "Informações atualizadas com sucesso!";
             return RedirectToPage();
         }
     }

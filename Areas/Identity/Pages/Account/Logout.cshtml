@@ -18,7 +18,7 @@
         {
             <form asp-area="Identity"
                   asp-page="/Account/Logout"
-                  asp-route-returnUrl="@Url.Page("/", new { area = "" })"
+                  asp-route-returnUrl="/"
                   method="post">
 
                 <p class="text-info mb-3">
@@ -31,7 +31,7 @@
         else
         {
             <p class="text-success">Você saiu da sua conta com sucesso.</p>
-            <a href="~/" class="auth-btn mt-3">Voltar ao início</a>
+            <a href="/" class="auth-btn mt-3">Voltar ao início</a>
         }
 
     </div>

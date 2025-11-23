@@ -142,8 +142,7 @@
                         let v = el.value ?? '';
                         v = v.replace(/\s/g, '');
                         v = v.replace(/R\$|r\$/g, '');
-                        v = v.replace(/\./g, ''); // remove separador de milhar
-                        // MANTEMOS vírgula (pt-BR) — não trocar por ponto
+                        v = v.replace(/\./g, '');
                         el.value = v;
                     });
                 }, { once: false });

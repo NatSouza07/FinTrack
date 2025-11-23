@@ -16,15 +16,14 @@
             <dd class="col-sm-9">@Model.Nome</dd>
 
             <dt class="col-sm-3">Saldo</dt>
-            <dd class="col-sm-9">@Model.SaldoInicial.ToString("C2")</dd>
+            <dd class="col-sm-9">@Model.SaldoInicial.ToString("C")</dd>
         </dl>
 
         <form asp-action="Delete">
-
             <input type="hidden" asp-for="Id" />
 
             <div class="mt-4 d-flex gap-3">
-                <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
+                <a asp-action="Index" class="btn ft-btn-secondary px-4">Cancelar</a>
 
                 <button type="submit"
                         class="btn btn-danger px-4 fw-bold"
@@ -32,7 +31,6 @@
                     Confirmar Exclusão
                 </button>
             </div>
-
         </form>
 
     </div>
@@ -45,12 +43,6 @@
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         backdrop-filter: blur(12px);
-    }
-
-    .ft-main-content {
-        background: #1e1e1e !important;
-        padding: 40px !important;
-        min-height: 100vh;
     }
 
     .ft-page-container {

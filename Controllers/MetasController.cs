@@ -22,12 +22,10 @@ namespace FinTrack.Controllers
             _userManager = userManager;
         }
 
-        // INDEX
         public async Task<IActionResult> Index()
         {
             var usuarioId = _userManager.GetUserId(User);
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             var metas = await _context.Metas
                 .Where(m => m.UsuarioId == usuarioId)
@@ -37,14 +35,11 @@ namespace FinTrack.Controllers
             {
                 decimal progresso = await _context.Transacoes
                     .Where(t => t.UsuarioId == usuarioId &&
-                                // ajusta conforme seu modelo: aqui assume que Transacao possui enum/tipo que indica entrada/saida
-                                // se seu modelo não tiver essa propriedade, remova essa condição
                                 t.Tipo == Transacao.TipoTransacao.Entrada &&
                                 t.Data.Month == meta.Mes &&
                                 t.Data.Year == meta.Ano)
                     .SumAsync(t => (decimal?)t.Valor) ?? 0;
 
-                // popula propriedades auxiliares (use os nomes reais do seu model)
                 meta.ProgressoCalculado = progresso;
                 meta.Porcentagem = meta.ValorMeta == 0 ? 0 : (int)((progresso / meta.ValorMeta) * 100);
             }
@@ -52,21 +47,17 @@ namespace FinTrack.Controllers
             return View(metas);
         }
 
-        // DETAILS
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var usuarioId = _userManager.GetUserId(User);
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             var meta = await _context.Metas
                 .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
 
-            if (meta == null)
-                return NotFound();
+            if (meta == null) return NotFound();
 
             decimal progresso = await _context.Transacoes
                 .Where(t => t.UsuarioId == usuarioId &&
@@ -81,10 +72,11 @@ namespace FinTrack.Controllers
             return View(meta);
         }
 
-        // CREATE (GET)
-        public IActionResult Create() => View();
+        public IActionResult Create()
+        {
+            return View();
+        }
 
-        // CREATE (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Meta meta)
@@ -93,8 +85,7 @@ namespace FinTrack.Controllers
                 return View(meta);
 
             var usuarioId = _userManager.GetUserId(User);
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             meta.UsuarioId = usuarioId;
 
@@ -104,36 +95,29 @@ namespace FinTrack.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // EDIT (GET)
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var usuarioId = _userManager.GetUserId(User);
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             var meta = await _context.Metas
                 .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
 
-            if (meta == null)
-                return NotFound();
+            if (meta == null) return NotFound();
 
             return View(meta);
         }
 
-        // EDIT (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Meta meta)
         {
-            if (id != meta.Id)
-                return NotFound();
+            if (id != meta.Id) return NotFound();
 
             var usuarioId = _userManager.GetUserId(User);
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             if (!ModelState.IsValid)
                 return View(meta);
@@ -146,39 +130,32 @@ namespace FinTrack.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // DELETE (GET)
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var usuarioId = _userManager.GetUserId(User);
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             var meta = await _context.Metas
                 .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
 
-            if (meta == null)
-                return NotFound();
+            if (meta == null) return NotFound();
 
             return View(meta);
         }
 
-        // DELETE (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var usuarioId = _userManager.GetUserId(User);
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             var meta = await _context.Metas
                 .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
 
-            if (meta == null)
-                return Unauthorized();
+            if (meta == null) return Unauthorized();
 
             _context.Metas.Remove(meta);
             await _context.SaveChangesAsync();

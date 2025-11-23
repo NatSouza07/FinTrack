@@ -15,29 +15,34 @@
 
     <partial name="_StatusMessage" for="StatusMessage" />
 
-    <form id="profile-form" method="post" class="mt-3">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+    <form id="profile-form" method="post" enctype="multipart/form-data" class="mt-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-        <div class="form-floating mb-3">
-            <input asp-for="Username"
-                   class="form-control"
-                   placeholder="Nome de Usuário"
-                   disabled />
-            <label asp-for="Username" class="form-label">Nome de Usuário</label>
+        <div class="mb-3">
+            <label asp-for="Input.Nickname"></label>
+            <input asp-for="Input.Nickname" class="form-control" />
+            <span asp-validation-for="Input.Nickname" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label>Foto de Perfil (PNG)</label>
+            <input type="file" class="form-control" asp-for="Input.FotoPerfil" accept="image/png" />
         </div>
 
         <div class="form-floating mb-3">
-            <input asp-for="Input.PhoneNumber"
-                   class="form-control"
-                   placeholder="Digite seu número de telefone" />
-            <label asp-for="Input.PhoneNumber" class="form-label">Número de Telefone</label>
+            <input asp-for="Username" class="form-control" disabled />
+            <label asp-for="Username">E-mail do Usuário</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.PhoneNumber" class="form-control" />
+            <label asp-for="Input.PhoneNumber">Número de Telefone</label>
             <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
         </div>
 
-        <button id="update-profile-button" type="submit" class="btn ft-btn-primary w-100">
-            Salvar Alterações
-        </button>
+        <button type="submit" class="btn ft-btn-primary w-100">Salvar Alterações</button>
     </form>
+
 </div>
 
 @section Scripts {

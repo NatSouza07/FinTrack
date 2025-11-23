@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using FinTrack.Models
+@inject UserManager<Usuario> UserManager
+
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
@@ -29,7 +33,7 @@
         <ul class="ft-menu">
 
             <li class="ft-tooltip" data-title="Dashboard">
-                <a asp-controller="Dashboard" asp-action="Index">
+                <a asp-controller="Home" asp-action="Index">
                     <i class="bi bi-speedometer2"></i><span>Dashboard</span>
                 </a>
             </li>
@@ -66,23 +70,60 @@
 
         </ul>
 
-        <a asp-controller="Account" asp-action="Perfil" class="ft-profile-box">
-            <img src="~/img/user-default.png" class="ft-profile-photo" />
+        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="ft-profile-box">
+            @{
+                var u = await UserManager.GetUserAsync(User);
+                var foto = string.IsNullOrEmpty(u?.FotoPerfil) ? "/img/perfis/default.png" : u.FotoPerfil;
+                var name = u?.Nickname ?? u?.UserName ?? "Usuário";
+            }
+            <img src="@foto" class="ft-profile-photo" />
+
             <div class="ft-profile-details">
-                <span class="ft-profile-name">Usuário</span>
+                <span class="ft-profile-name">@name</span>
             </div>
-            <span class="ft-logout-btn d-none"></span>
         </a>
 
-        <a asp-controller="Account" asp-action="Logout" class="ft-logout-btn-absolute">
-            <i class="bi bi-box-arrow-right"></i>
-        </a>
+        <form method="post"
+              asp-area="Identity"
+              asp-page="/Account/Logout"
+              class="d-inline">
+            <button type="submit" class="ft-logout-btn-absolute">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </form>
 
     </nav>
 
     <div id="sidebar-spacer"></div>
 
     <div id="mainContent" class="ft-main-content">
+        <!-- GLOBAL ALERTS -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show ft-alert" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show ft-alert" role="alert">
+                <i class="bi bi-x-circle-fill me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show ft-alert" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @TempData["Warning"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
         @RenderBody()
     </div>
 

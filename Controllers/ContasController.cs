@@ -25,31 +25,32 @@ namespace FinTrack.Controllers
             _accountService = accountService;
         }
 
-        // INDEX
         public async Task<IActionResult> Index()
         {
             var usuarioId = _userManager.GetUserId(User);
+            if (usuarioId is null)
+                return Unauthorized();
 
             var contas = await _context.Contas
                 .Where(c => c.UsuarioId == usuarioId)
                 .ToListAsync();
 
-            // Aplicar cálculo de saldo em cada conta
             foreach (var conta in contas)
             {
-                conta.SaldoInicial = await _accountService.GetSaldoAsync(conta.Id, usuarioId!);
+                conta.SaldoInicial = await _accountService.GetSaldoAsync(conta.Id, usuarioId);
             }
 
             return View(contas);
         }
 
-        // DETAILS
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
                 return NotFound();
 
             var usuarioId = _userManager.GetUserId(User);
+            if (usuarioId is null)
+                return Unauthorized();
 
             var conta = await _context.Contas
                 .FirstOrDefaultAsync(c => c.Id == id && c.UsuarioId == usuarioId);
@@ -57,19 +58,16 @@ namespace FinTrack.Controllers
             if (conta == null)
                 return NotFound();
 
-            // Calcular saldo atualizado
-            conta.SaldoInicial = await _accountService.GetSaldoAsync(conta.Id, usuarioId!);
+            conta.SaldoInicial = await _accountService.GetSaldoAsync(conta.Id, usuarioId);
 
             return View(conta);
         }
 
-        // CREATE (GET)
         public IActionResult Create()
         {
             return View();
         }
 
-        // CREATE (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Conta conta)
@@ -89,13 +87,14 @@ namespace FinTrack.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // EDIT (GET)
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
                 return NotFound();
 
             var usuarioId = _userManager.GetUserId(User);
+            if (usuarioId is null)
+                return Unauthorized();
 
             var conta = await _context.Contas
                 .FirstOrDefaultAsync(c => c.Id == id && c.UsuarioId == usuarioId);
@@ -106,7 +105,6 @@ namespace FinTrack.Controllers
             return View(conta);
         }
 
-        // EDIT (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Conta conta)
@@ -115,6 +113,8 @@ namespace FinTrack.Controllers
                 return NotFound();
 
             var usuarioId = _userManager.GetUserId(User);
+            if (usuarioId is null)
+                return Unauthorized();
 
             var contaDb = await _context.Contas
                 .AsNoTracking()
@@ -126,7 +126,7 @@ namespace FinTrack.Controllers
             if (!ModelState.IsValid)
                 return View(conta);
 
-            conta.UsuarioId = usuarioId!;
+            conta.UsuarioId = usuarioId;
 
             _context.Update(conta);
             await _context.SaveChangesAsync();
@@ -134,13 +134,14 @@ namespace FinTrack.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // DELETE (GET)
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
                 return NotFound();
 
             var usuarioId = _userManager.GetUserId(User);
+            if (usuarioId is null)
+                return Unauthorized();
 
             var conta = await _context.Contas
                 .FirstOrDefaultAsync(c => c.Id == id && c.UsuarioId == usuarioId);
@@ -151,12 +152,13 @@ namespace FinTrack.Controllers
             return View(conta);
         }
 
-        // DELETE (POST)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var usuarioId = _userManager.GetUserId(User);
+            if (usuarioId is null)
+                return Unauthorized();
 
             var conta = await _context.Contas
                 .FirstOrDefaultAsync(c => c.Id == id && c.UsuarioId == usuarioId);

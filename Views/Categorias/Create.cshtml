@@ -6,7 +6,7 @@
 
 <div class="ft-page-container">
 
-    <h2 class="fw-bold text-white mb-3">Nova Categoria</h2>
+    <h2 class="fw-bold text-white mb-2">Nova Categoria</h2>
     <p class="text-secondary mb-4">Crie uma nova categoria para classificar suas transações.</p>
 
     <div class="ft-card p-4">
@@ -23,14 +23,16 @@
                 <label asp-for="Tipo" class="form-label text-white-50"></label>
                 <select asp-for="Tipo" class="form-select">
                     <option value="">Selecione</option>
-                    <option value="Receita">Receita</option>
-                    <option value="Despesa">Despesa</option>
+                    <option value="1">Receita</option>
+                    <option value="2">Despesa</option>
                 </select>
                 <span asp-validation-for="Tipo" class="text-danger"></span>
             </div>
 
             <div class="mt-4 d-flex gap-3">
-                <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    Cancelar
+                </a>
 
                 <button type="submit"
                         class="btn fw-bold px-4"

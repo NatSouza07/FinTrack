@@ -8,6 +8,7 @@ namespace FinTrack.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "O valor da meta é obrigatório.")]
+        [Range(0.01, 9999999, ErrorMessage = "O valor da meta deve ser maior que zero.")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal ValorMeta { get; set; }
 

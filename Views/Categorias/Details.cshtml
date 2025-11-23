@@ -11,6 +11,7 @@
     <div class="ft-card p-4">
 
         <dl class="row text-white">
+
             <dt class="col-sm-3">Nome</dt>
             <dd class="col-sm-9">@Model.Nome</dd>
 
@@ -18,18 +19,24 @@
             <dd class="col-sm-9">
                 @if (Model.Tipo == FinTrack.Models.TipoCategoria.Receita)
                 {
-                    <span class="text-success">Receita</span>
+                    <span class="text-success fw-bold">Receita</span>
                 }
                 else
                 {
-                    <span class="text-danger">Despesa</span>
+                    <span class="text-danger fw-bold">Despesa</span>
                 }
             </dd>
+
         </dl>
 
         <div class="mt-4 d-flex gap-3">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-4">Editar</a>
-            <a asp-action="Index" class="btn btn-secondary px-4">Voltar</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-4">
+                Editar
+            </a>
+
+            <a asp-action="Index" class="btn btn-secondary px-4">
+                Voltar
+            </a>
         </div>
 
     </div>
@@ -42,6 +49,7 @@
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         backdrop-filter: blur(12px);
+        padding: 24px;
     }
 
     .ft-main-content {

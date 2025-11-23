@@ -212,81 +212,6 @@
     background: #0c0c0c;
 }
 
-.auth-container {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #0c0c0c;
-}
-
-.auth-card {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 40px;
-    width: 420px;
-    border-radius: 14px;
-    color: white;
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 215, 0, 0.25);
-    animation: fadeIn .5s ease;
-}
-
-.auth-logo img {
-    width: 80px;
-    display: block;
-    margin: 0 auto 10px;
-    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
-}
-
-.auth-title {
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 600;
-}
-
-.auth-btn {
-    width: 100%;
-    background: #ffd700;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    color: black;
-    font-weight: 600;
-    margin-top: 10px;
-}
-
-    .auth-btn:hover {
-        background: #ffe98f;
-    }
-
-.auth-input:focus {
-    border-color: #ffd700 !important;
-    box-shadow: 0 0 4px rgba(255, 215, 0, 0.4);
-}
-
-.auth-links {
-    text-align: center;
-    margin-top: 15px;
-}
-
-    .auth-links a {
-        color: #ffd700;
-        display: block;
-        margin-top: 5px;
-    }
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .ft-navbar {
     background: rgba(0, 0, 0, 0.4);
     border-bottom: 1px solid #00ffbb;
@@ -430,4 +355,31 @@
         overflow-x: auto;
         padding-bottom: .5rem;
     }
+}
+
+.ft-alert {
+    margin-bottom: 20px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    font-weight: 500;
+    padding: 14px 18px;
+}
+
+.alert-success {
+    border-left: 4px solid #28a745 !important;
+}
+
+.alert-danger {
+    border-left: 4px solid #dc3545 !important;
+}
+
+.alert-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+
+.ft-alert .btn-close {
+    filter: invert(1);
 }

@@ -6,7 +6,7 @@
 
 <div class="ft-page-container">
 
-    <h2 class="fw-bold text-white mb-3">Editar Categoria</h2>
+    <h2 class="fw-bold text-white mb-2">Editar Categoria</h2>
     <p class="text-secondary mb-4">Atualize as informações da categoria selecionada.</p>
 
     <div class="ft-card p-4">
@@ -23,14 +23,16 @@
             <div class="mb-3">
                 <label asp-for="Tipo" class="form-label text-white-50"></label>
                 <select asp-for="Tipo" class="form-select">
-                    <option value="Receita" selected="@(Model.Tipo == FinTrack.Models.TipoCategoria.Receita)">Receita</option>
-                    <option value="Despesa" selected="@(Model.Tipo == FinTrack.Models.TipoCategoria.Despesa)">Despesa</option>
+                    <option value="1" selected="@(Model.Tipo == FinTrack.Models.TipoCategoria.Receita)">Receita</option>
+                    <option value="2" selected="@(Model.Tipo == FinTrack.Models.TipoCategoria.Despesa)">Despesa</option>
                 </select>
                 <span asp-validation-for="Tipo" class="text-danger"></span>
             </div>
 
             <div class="mt-4 d-flex gap-3">
-                <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    Cancelar
+                </a>
 
                 <button type="submit"
                         class="btn fw-bold px-4"
@@ -44,8 +46,6 @@
     </div>
 
 </div>
-
-
 
 <style>
     .ft-card {

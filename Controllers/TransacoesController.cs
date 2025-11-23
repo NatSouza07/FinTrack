@@ -9,12 +9,17 @@ using Microsoft.EntityFrameworkCore;
 namespace FinTrack.Controllers
 {
     [Authorize]
-    public class TransacoesController(FinTrackContext context, UserManager<Usuario> userManager) : Controller
+    public class TransacoesController : Controller
     {
-        private readonly FinTrackContext _context = context;
-        private readonly UserManager<Usuario> _userManager = userManager;
+        private readonly FinTrackContext _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        // VIEWBAG
+        public TransacoesController(FinTrackContext context, UserManager<Usuario> userManager)
+        {
+            _context = context;
+            _userManager = userManager;
+        }
+
         private async Task PopularSelectListsAsync(string usuarioId, Transacao transacao = null)
         {
             ViewBag.Contas = new SelectList(
@@ -43,8 +48,6 @@ namespace FinTrack.Controllers
             );
         }
 
-        // INDEX (SELECT)
-
         public async Task<IActionResult> Index(
             DateTime? dataInicio,
             DateTime? dataFim,
@@ -54,9 +57,7 @@ namespace FinTrack.Controllers
             Transacao.TipoTransacao? tipo)
         {
             var usuarioId = _userManager.GetUserId(User);
-
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             var query = _context.Transacoes
                 .Include(t => t.Conta)
@@ -65,7 +66,6 @@ namespace FinTrack.Controllers
                 .Where(t => t.UsuarioId == usuarioId)
                 .AsQueryable();
 
-            // FILTROS
             if (dataInicio.HasValue)
                 query = query.Where(t => t.Data >= dataInicio.Value);
 
@@ -84,7 +84,6 @@ namespace FinTrack.Controllers
             if (tipo.HasValue)
                 query = query.Where(t => t.Tipo == tipo.Value);
 
-            // DROPDOWNS
             await PopularSelectListsAsync(usuarioId);
 
             var transacoes = await query
@@ -94,11 +93,13 @@ namespace FinTrack.Controllers
             return View(transacoes);
         }
 
-        // DETAILS
-
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Transação não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var usuarioId = _userManager.GetUserId(User);
 
@@ -108,115 +109,128 @@ namespace FinTrack.Controllers
                 .Include(t => t.TipoPagamento)
                 .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == usuarioId);
 
-            if (transacao == null) return NotFound();
+            if (transacao == null)
+            {
+                TempData["Error"] = "A transação selecionada não existe.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(transacao);
         }
 
-        // CREATE (GET)
-
         public async Task<IActionResult> Create()
         {
             var usuarioId = _userManager.GetUserId(User);
-
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             await PopularSelectListsAsync(usuarioId);
-
             return View();
         }
-
-        // CREATE (POST)
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Transacao transacao)
         {
             var usuarioId = _userManager.GetUserId(User);
-
-            if (usuarioId is null)
-                return Unauthorized();
+            if (usuarioId is null) return Unauthorized();
 
             if (!ModelState.IsValid)
             {
+                TempData["Error"] = "Preencha todos os campos obrigatórios.";
                 await PopularSelectListsAsync(usuarioId, transacao);
                 return View(transacao);
             }
 
-            if (usuarioId is null)
-                return Unauthorized();
-
-            transacao.UsuarioId = usuarioId;
-
-            _context.Add(transacao);
-            await _context.SaveChangesAsync();
+            try
+            {
+                transacao.UsuarioId = usuarioId;
+                _context.Add(transacao);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Transação criada com sucesso!";
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao salvar a transação.";
+            }
 
             return RedirectToAction(nameof(Index));
         }
 
-        // EDIT (GET)
-
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Transação inválida.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var usuarioId = _userManager.GetUserId(User);
-
-            if (usuarioId is null)
-                return Unauthorized();
 
             var transacao = await _context.Transacoes
                 .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == usuarioId);
 
-            if (transacao == null) return NotFound();
+            if (transacao == null)
+            {
+                TempData["Error"] = "Transação não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
             await PopularSelectListsAsync(usuarioId, transacao);
 
             return View(transacao);
         }
 
-        // EDIT (POST)
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Transacao transacao)
         {
-            if (id != transacao.Id) return NotFound();
+            if (id != transacao.Id)
+            {
+                TempData["Error"] = "Transação inválida.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var usuarioId = _userManager.GetUserId(User);
-
-            if (usuarioId is null)
-                return Unauthorized();
 
             var transacaoDb = await _context.Transacoes
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == usuarioId);
 
-            if (transacaoDb == null) return Unauthorized();
+            if (transacaoDb == null)
+            {
+                TempData["Error"] = "Você não tem permissão para editar esta transação.";
+                return RedirectToAction(nameof(Index));
+            }
 
             if (!ModelState.IsValid)
             {
+                TempData["Error"] = "Preencha os campos corretamente.";
                 await PopularSelectListsAsync(usuarioId, transacao);
                 return View(transacao);
             }
 
-            if (usuarioId is null)
-                return Unauthorized();
-
-            transacao.UsuarioId = usuarioId;
-
-            _context.Update(transacao);
-            await _context.SaveChangesAsync();
+            try
+            {
+                transacao.UsuarioId = usuarioId;
+                _context.Update(transacao);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Transação atualizada!";
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao atualizar a transação.";
+            }
 
             return RedirectToAction(nameof(Index));
         }
 
-        // DELETE (GET)
-
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Transação não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var usuarioId = _userManager.GetUserId(User);
 
@@ -226,12 +240,14 @@ namespace FinTrack.Controllers
                 .Include(t => t.TipoPagamento)
                 .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == usuarioId);
 
-            if (transacao == null) return NotFound();
+            if (transacao == null)
+            {
+                TempData["Error"] = "A transação informada não existe.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(transacao);
         }
-
-        // DELETE (POST)
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -242,10 +258,22 @@ namespace FinTrack.Controllers
             var transacao = await _context.Transacoes
                 .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == usuarioId);
 
-            if (transacao == null) return Unauthorized();
+            if (transacao == null)
+            {
+                TempData["Error"] = "Transação não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            _context.Transacoes.Remove(transacao);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Transacoes.Remove(transacao);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Transação removida com sucesso!";
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao excluir transação.";
+            }
 
             return RedirectToAction(nameof(Index));
         }

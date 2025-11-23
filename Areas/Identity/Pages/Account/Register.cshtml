@@ -18,6 +18,12 @@
             <div asp-validation-summary="ModelOnly" class="text-warning"></div>
 
             <div class="mb-3">
+                <label asp-for="Input.Nickname"></label>
+                <input asp-for="Input.Nickname" class="form-control auth-input" />
+                <span asp-validation-for="Input.Nickname" class="text-warning"></span>
+            </div>
+
+            <div class="mb-3">
                 <label asp-for="Input.Email" class="form-label"></label>
                 <input asp-for="Input.Email" class="form-control auth-input" />
                 <span asp-validation-for="Input.Email" class="text-warning"></span>

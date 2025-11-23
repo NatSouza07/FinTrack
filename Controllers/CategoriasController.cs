@@ -1,15 +1,14 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using FinTrack.Data;
+using FinTrack.Models;
+using FinTrack.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FinTrack.Data;
-using FinTrack.Models;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
 
 namespace FinTrack.Controllers
 {
+    [Authorize]
     public class CategoriasController : Controller
     {
         private readonly FinTrackContext _context;
@@ -19,7 +18,6 @@ namespace FinTrack.Controllers
             _context = context;
         }
 
-        // INDEX
         public async Task<IActionResult> Index(int? tipoId)
         {
             ViewData["Tipos"] = Enum.GetValues(typeof(TipoCategoria))
@@ -34,139 +32,144 @@ namespace FinTrack.Controllers
 
             if (tipoId.HasValue && Enum.IsDefined(typeof(TipoCategoria), tipoId.Value))
             {
-                var tipoFiltro = (TipoCategoria)tipoId.Value;
-                categorias = categorias.Where(c => c.Tipo == tipoFiltro);
-
+                categorias = categorias.Where(c => c.Tipo == (TipoCategoria)tipoId.Value);
                 ViewData["SelectedTipoId"] = tipoId.Value;
             }
 
             return View(await categorias.ToListAsync());
         }
 
-        // DETAILS (GET)
-
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Categoria inválida.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var categoria = await _context.Categorias
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(m => m.Id == id);
 
             if (categoria == null)
             {
-                return NotFound();
+                TempData["Error"] = "Categoria não encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(categoria);
         }
-
-        // CREATE (GET)
 
         public IActionResult Create()
         {
             return View();
         }
 
-        // CREATE (POST)
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Tipo")] Categoria categoria)
+        public async Task<IActionResult> Create(Categoria categoria)
         {
-            var existeDuplicata = await _context.Categorias
+            var existe = await _context.Categorias
                 .AnyAsync(c => c.Nome == categoria.Nome && c.Tipo == categoria.Tipo);
 
-            if (existeDuplicata)
+            if (existe)
+                ModelState.AddModelError("Nome", "Já existe uma categoria com este Nome e Tipo.");
+
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Nome", "Já existe uma categoria com este Nome e Tipo (Receita/Despesa).");
+                TempData["Error"] = "Preencha os campos corretamente.";
+                return View(categoria);
             }
 
-            if (ModelState.IsValid)
+            try
             {
                 _context.Add(categoria);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                TempData["Success"] = "Categoria criada com sucesso!";
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao criar a categoria.";
+                return View(categoria);
             }
 
-            return View(categoria);
+            return RedirectToAction(nameof(Index));
         }
-
-        // EDIT (GET)
 
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Categoria inválida.";
+                return RedirectToAction(nameof(Index));
             }
 
             var categoria = await _context.Categorias.FindAsync(id);
 
             if (categoria == null)
             {
-                return NotFound();
+                TempData["Error"] = "Categoria não encontrada.";
+                return RedirectToAction(nameof(Index));
             }
+
             return View(categoria);
         }
-
-        // EDIT (POST)
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Tipo")] Categoria categoria)
+        public async Task<IActionResult> Edit(int id, Categoria categoria)
         {
             if (id != categoria.Id)
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(categoria);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Categorias.Any(e => e.Id == categoria.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                TempData["Error"] = "ID inconsistente.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(categoria);
-        }
 
-        // DELETE (GET)
+            var existe = await _context.Categorias
+                .AnyAsync(c => c.Id != categoria.Id &&
+                               c.Nome == categoria.Nome &&
+                               c.Tipo == categoria.Tipo);
+
+            if (existe)
+                ModelState.AddModelError("Nome", "Já existe uma categoria com este Nome e Tipo.");
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Preencha os campos corretamente.";
+                return View(categoria);
+            }
+
+            try
+            {
+                _context.Update(categoria);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Categoria atualizada!";
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao atualizar a categoria.";
+                return View(categoria);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
 
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["Error"] = "Categoria inválida.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var categoria = await _context.Categorias
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(m => m.Id == id);
 
             if (categoria == null)
             {
-                return NotFound();
+                TempData["Error"] = "Categoria não encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(categoria);
         }
-
-        // DELETE (POST)
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -174,12 +177,23 @@ namespace FinTrack.Controllers
         {
             var categoria = await _context.Categorias.FindAsync(id);
 
-            if (categoria != null)
+            if (categoria == null)
             {
-                _context.Categorias.Remove(categoria);
+                TempData["Error"] = "Categoria não encontrada.";
+                return RedirectToAction(nameof(Index));
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Categorias.Remove(categoria);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Categoria removida com sucesso!";
+            }
+            catch
+            {
+                TempData["Error"] = "Erro ao remover a categoria.";
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }
