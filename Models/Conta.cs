@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FinTrack.Models
@@ -12,9 +13,11 @@ namespace FinTrack.Models
         public string Nome { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O saldo inicial é obrigatório.")]
-        [Range(0, 9999999)]
         [Column(TypeName = "decimal(18,2)")]
         [Display(Name = "Saldo Inicial")]
+        [DataType(DataType.Currency)]
+        [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
+        [BindProperty(SupportsGet = true)]
         public decimal SaldoInicial { get; set; }
 
         [Required(ErrorMessage = "O usuário é obrigatório.")]

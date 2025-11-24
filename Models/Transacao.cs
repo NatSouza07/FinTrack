@@ -11,7 +11,6 @@ namespace FinTrack.Models
         public TipoTransacao Tipo { get; set; }
 
         [Required(ErrorMessage = "O valor da transação é obrigatório.")]
-        [Range(0.01, 9999999, ErrorMessage = "O valor deve ser maior que zero.")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Valor { get; set; }
 

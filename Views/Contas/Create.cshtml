@@ -6,7 +6,7 @@
 
 <div class="ft-page-container">
 
-    <h2 class="fw-bold text-white mb-3">Nova Conta</h2>
+    <h2 class="fw-bold text-white mb-2">Nova Conta</h2>
     <p class="text-secondary mb-4">Cadastre uma nova conta para organizar suas finanças.</p>
 
     <div class="ft-card p-4">
@@ -21,20 +21,31 @@
 
             <div class="mb-3">
                 <label asp-for="SaldoInicial" class="form-label text-white-50"></label>
-                <input asp-for="SaldoInicial" class="form-control ft-money" inputmode="numeric" />
+
+                <input asp-for="SaldoInicial"
+                       type="text"
+                       class="form-control ft-money"
+                       autocomplete="off" />
+
                 <span asp-validation-for="SaldoInicial" class="text-danger"></span>
             </div>
 
             <div class="mt-4 d-flex gap-3">
-                <a asp-action="Index" class="btn ft-btn-secondary px-4">Cancelar</a>
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    Cancelar
+                </a>
 
-                <button type="submit" class="btn ft-btn-primary fw-bold px-4">
+                <button type="submit"
+                        class="btn fw-bold px-4"
+                        style="background:#ffd700; color:#000; border-radius:10px;">
                     Salvar Conta
                 </button>
             </div>
 
         </form>
+
     </div>
+
 </div>
 
 <style>
@@ -43,6 +54,12 @@
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         backdrop-filter: blur(12px);
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
     }
 
     .ft-page-container {
@@ -55,27 +72,21 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        $(document).ready(function () {
+            const form = $('form[asp-action="Create"]');
+            const validator = form.data('validator');
 
-            if (window.AutoNumeric) {
-                AutoNumeric.multiple('.ft-money', {
-                    digitGroupSeparator: ".",
-                    decimalCharacter: ",",
-                    decimalPlaces: 2,
-                    currencySymbol: "R$ ",
-                    currencySymbolPlacement: "p"
-                });
-            }
+            if (validator) {
+                form.on('submit', function () {
+                    const moneyFields = document.querySelectorAll(".ft-money");
 
-            const form = document.querySelector("form");
-            if (form) {
-                form.addEventListener("submit", function () {
-                    document.querySelectorAll(".ft-money").forEach(el => {
-                        let v = el.value ?? "";
-                        v = v.replace(/\s/g, "");
-                        v = v.replace(/R\$|r\$/gi, "");
-                        v = v.replace(/\./g, "");
-                        el.value = v;
+                    moneyFields.forEach(field => {
+                        const inst = AutoNumeric.getAutoNumericElement(field);
+
+                        if (inst) {
+                            const rawValue = inst.getNumericString();
+                            $(field).val(rawValue);
+                        }
                     });
                 });
             }

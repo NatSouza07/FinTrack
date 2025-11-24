@@ -11,16 +11,25 @@
     <div class="ft-card p-4">
 
         <dl class="row text-white">
+
             <dt class="col-sm-3">Nome</dt>
             <dd class="col-sm-9">@Model.Nome</dd>
 
-            <dt class="col-sm-3">Saldo Atual</dt>
-            <dd class="col-sm-9">@Model.SaldoInicial.ToString("C")</dd>
+            <dt class="col-sm-3">Saldo Inicial</dt>
+            <dd class="col-sm-9">
+                <span class="fw-bold">@Model.SaldoInicial.ToString("C")</span>
+            </dd>
+
         </dl>
 
         <div class="mt-4 d-flex gap-3">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn ft-btn-primary px-4">Editar</a>
-            <a asp-action="Index" class="btn ft-btn-secondary px-4">Voltar</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary px-4">
+                Editar
+            </a>
+
+            <a asp-action="Index" class="btn btn-secondary px-4">
+                Voltar
+            </a>
         </div>
 
     </div>
@@ -33,6 +42,13 @@
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         backdrop-filter: blur(12px);
+        padding: 24px;
+    }
+
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
     }
 
     .ft-page-container {

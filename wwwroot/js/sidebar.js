@@ -38,6 +38,10 @@
     });
 
     document.addEventListener("keydown", (e) => {
+
+        if (!e.key || typeof e.key !== "string")
+            return;
+
         if (e.key.toLowerCase() === "m") {
             toggleButton.click();
         }

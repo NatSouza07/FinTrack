@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using System.Diagnostics; // Adicionado para Debug
 
 [Authorize]
 public class HomeController : Controller
@@ -20,6 +21,14 @@ public class HomeController : Controller
         _userManager = userManager;
     }
 
+    public class TransacaoDashboardViewModel
+    {
+        public DateTime Data { get; set; }
+        public decimal Valor { get; set; }
+        public string Categoria { get; set; }
+        public Transacao.TipoTransacao Tipo { get; set; }
+    }
+
     public class DashboardViewModel
     {
         public decimal TotalSaldo { get; set; }
@@ -30,7 +39,7 @@ public class HomeController : Controller
         public string[] MensalLabels { get; set; }
         public string[] CategoriaLabels { get; set; }
         public decimal[] CategoriaValues { get; set; }
-        public object[] UltimasTransacoes { get; set; }
+        public TransacaoDashboardViewModel[] UltimasTransacoes { get; set; }
     }
 
     public async Task<IActionResult> Index()
@@ -56,13 +65,12 @@ public class HomeController : Controller
         var transacoesLista = await transacoesUsuario
             .OrderByDescending(t => t.Data)
             .Take(10)
-            .Select(t => new
+            .Select(t => new TransacaoDashboardViewModel
             {
-                t.Id,
-                t.Data,
-                t.Valor,
+                Data = t.Data,
+                Valor = t.Valor,
+                Tipo = t.Tipo,
                 Categoria = t.Categoria != null ? t.Categoria.Nome : "(Sem categoria)",
-                Tipo = t.Tipo.ToString()
             })
             .ToListAsync();
 
@@ -78,6 +86,26 @@ public class HomeController : Controller
                         t.Tipo == Transacao.TipoTransacao.Saida)
             .SumAsync(t => (decimal?)t.Valor) ?? 0m;
 
+        // --- DEBUG CRÍTICO AQUI ---
+        var entradasTotal = await transacoesUsuario
+            .Where(t => t.Tipo == Transacao.TipoTransacao.Entrada)
+            .SumAsync(t => (decimal?)t.Valor) ?? 0m;
+
+        var saidasTotal = await transacoesUsuario
+            .Where(t => t.Tipo == Transacao.TipoTransacao.Saida)
+            .SumAsync(t => (decimal?)t.Valor) ?? 0m;
+
+        decimal totalMovimentos = entradasTotal - saidasTotal;
+        decimal saldoCalculado = saldoInicialTotal + totalMovimentos;
+
+        Debug.WriteLine("------------------------------------------");
+        Debug.WriteLine($"DB CHECK: Saldo Inicial Total: {saldoInicialTotal}");
+        Debug.WriteLine($"DB CHECK: Entradas Totais: {entradasTotal}");
+        Debug.WriteLine($"DB CHECK: Saídas Totais: {saidasTotal}");
+        Debug.WriteLine($"DB CHECK: Saldo CALCULADO: {saldoCalculado}");
+        Debug.WriteLine("------------------------------------------");
+        // -----------------------------
+
         decimal[] mensalValues = new decimal[12];
         string[] mensalLabels = Enumerable.Range(1, 12)
             .Select(m => System.Globalization.CultureInfo.CurrentCulture
@@ -86,15 +114,29 @@ public class HomeController : Controller
 
         for (int m = 1; m <= 12; m++)
         {
-            mensalValues[m - 1] = await transacoesUsuario
-                .Where(t => t.Data.Year == anoAtual && t.Data.Month == m)
+            var entradas = await transacoesUsuario
+                .Where(t => t.Data.Year == anoAtual &&
+                            t.Data.Month == m &&
+                            t.Tipo == Transacao.TipoTransacao.Entrada)
                 .SumAsync(t => (decimal?)t.Valor) ?? 0m;
+
+            var saidas = await transacoesUsuario
+                .Where(t => t.Data.Year == anoAtual &&
+                            t.Data.Month == m &&
+                            t.Tipo == Transacao.TipoTransacao.Saida)
+                .SumAsync(t => (decimal?)t.Valor) ?? 0m;
+
+            mensalValues[m - 1] = entradas - saidas;
         }
 
         var categorias = await transacoesUsuario
             .Where(t => t.Data.Year == anoAtual)
             .GroupBy(t => t.Categoria != null ? t.Categoria.Nome : "(Sem categoria)")
-            .Select(g => new { Name = g.Key, Sum = g.Sum(x => x.Valor) })
+            .Select(g => new
+            {
+                Name = g.Key,
+                Sum = g.Sum(x => x.Tipo == Transacao.TipoTransacao.Entrada ? x.Valor : -x.Valor)
+            })
             .OrderByDescending(g => Math.Abs(g.Sum))
             .Take(8)
             .ToListAsync();
@@ -120,14 +162,11 @@ public class HomeController : Controller
                 metasAtingidas++;
         }
 
-        var totalMovimentos = await transacoesUsuario
-            .SumAsync(t => (decimal?)t.Valor) ?? 0m;
-
         var model = new DashboardViewModel
         {
-            TotalSaldo = saldoInicialTotal + totalMovimentos,
+            TotalSaldo = saldoCalculado,
             ReceitasMes = receitasMes,
-            DespesasMes = Math.Abs(despesasMes),
+            DespesasMes = despesasMes,
             MetasAtingidas = metasAtingidas,
             MensalValues = mensalValues,
             MensalLabels = mensalLabels,

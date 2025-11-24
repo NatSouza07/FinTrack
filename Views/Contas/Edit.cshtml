@@ -6,7 +6,7 @@
 
 <div class="ft-page-container">
 
-    <h2 class="fw-bold text-white mb-3">Editar Conta</h2>
+    <h2 class="fw-bold text-white mb-2">Editar Conta</h2>
     <p class="text-secondary mb-4">Altere as informações da conta selecionada.</p>
 
     <div class="ft-card p-4">
@@ -23,14 +23,23 @@
 
             <div class="mb-3">
                 <label asp-for="SaldoInicial" class="form-label text-white-50"></label>
-                <input asp-for="SaldoInicial" class="form-control ft-money" inputmode="numeric" />
+
+                <input asp-for="SaldoInicial"
+                       type="text"
+                       class="form-control ft-money"
+                       autocomplete="off" />
+
                 <span asp-validation-for="SaldoInicial" class="text-danger"></span>
             </div>
 
             <div class="mt-4 d-flex gap-3">
-                <a asp-action="Index" class="btn ft-btn-secondary px-4">Cancelar</a>
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    Cancelar
+                </a>
 
-                <button type="submit" class="btn ft-btn-primary fw-bold px-4">
+                <button type="submit"
+                        class="btn fw-bold px-4"
+                        style="background:#ffd700; color:#000; border-radius:10px;">
                     Salvar Alterações
                 </button>
             </div>
@@ -38,6 +47,7 @@
         </form>
 
     </div>
+
 </div>
 
 <style>
@@ -48,6 +58,12 @@
         backdrop-filter: blur(12px);
     }
 
+    .ft-main-content {
+        background: #1e1e1e !important;
+        padding: 40px !important;
+        min-height: 100vh;
+    }
+
     .ft-page-container {
         max-width: 1100px;
         margin: 0 auto;
@@ -56,32 +72,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-
-            if (window.AutoNumeric) {
-                AutoNumeric.multiple('.ft-money', {
-                    digitGroupSeparator: ".",
-                    decimalCharacter: ",",
-                    decimalPlaces: 2,
-                    currencySymbol: "R$ ",
-                    currencySymbolPlacement: "p"
-                });
-            }
-
-            const form = document.querySelector("form");
-            if (form) {
-                form.addEventListener("submit", function () {
-                    document.querySelectorAll(".ft-money").forEach(el => {
-                        let v = el.value ?? "";
-                        v = v.replace(/\s/g, "");
-                        v = v.replace(/R\$|r\$/gi, "");
-                        v = v.replace(/\./g, "");
-                        el.value = v;
-                    });
-                });
-            }
-        });
-    </script>
 }

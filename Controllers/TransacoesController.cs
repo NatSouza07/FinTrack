@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FinTrack.Controllers
 {
@@ -20,31 +23,44 @@ namespace FinTrack.Controllers
             _userManager = userManager;
         }
 
+        private string _GetUserId()
+        {
+            return _userManager.GetUserId(User);
+        }
+
         private async Task PopularSelectListsAsync(string usuarioId, Transacao transacao = null)
         {
+            if (usuarioId == null) return;
+
             ViewBag.Contas = new SelectList(
-                await _context.Contas.Where(c => c.UsuarioId == usuarioId).ToListAsync(),
+                await _context.Contas
+                    .Where(c => c.UsuarioId == usuarioId)
+                    .OrderBy(c => c.Nome)
+                    .ToListAsync(),
                 "Id",
                 "Nome",
                 transacao?.ContaId
             );
 
-            ViewBag.Categorias = new SelectList(
-                await _context.Categorias.ToListAsync(),
+            var categorias = await _context.Categorias
+                .OrderBy(c => c.Nome)
+                .ToListAsync();
+
+            ViewBag.Categorias = categorias;
+
+            ViewBag.CategoriasSelect = new SelectList(
+                categorias,
                 "Id",
-                "Nome",
-                transacao?.CategoriaId
+                "Nome"
             );
 
             ViewBag.TiposPagamento = new SelectList(
-                await _context.TiposPagamento.ToListAsync(),
+                await _context.TiposPagamento
+                    .OrderBy(t => t.Nome)
+                    .ToListAsync(),
                 "Id",
                 "Nome",
                 transacao?.TipoPagamentoId
-            );
-
-            ViewBag.TiposTransacao = new SelectList(
-                Enum.GetValues(typeof(Transacao.TipoTransacao))
             );
         }
 
@@ -56,7 +72,7 @@ namespace FinTrack.Controllers
             int? tipoPagamentoId,
             Transacao.TipoTransacao? tipo)
         {
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
             var query = _context.Transacoes
@@ -101,7 +117,7 @@ namespace FinTrack.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
 
             var transacao = await _context.Transacoes
                 .Include(t => t.Conta)
@@ -120,7 +136,7 @@ namespace FinTrack.Controllers
 
         public async Task<IActionResult> Create()
         {
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
             await PopularSelectListsAsync(usuarioId);
@@ -131,8 +147,11 @@ namespace FinTrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Transacao transacao)
         {
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
+
+            ModelState.Remove(nameof(Transacao.Valor));
+            ModelState.Remove(nameof(Transacao.UsuarioId));
 
             if (!ModelState.IsValid)
             {
@@ -143,14 +162,29 @@ namespace FinTrack.Controllers
 
             try
             {
+                var categoriaDb = await _context.Categorias
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == transacao.CategoriaId);
+
+                if (categoriaDb != null)
+                {
+                    transacao.Tipo =
+                        categoriaDb.Tipo == TipoCategoria.Receita
+                        ? Transacao.TipoTransacao.Entrada
+                        : Transacao.TipoTransacao.Saida;
+                }
+
                 transacao.UsuarioId = usuarioId;
                 _context.Add(transacao);
                 await _context.SaveChangesAsync();
+
                 TempData["Success"] = "Transação criada com sucesso!";
             }
-            catch
+            catch (Exception ex)
             {
-                TempData["Error"] = "Erro ao salvar a transação.";
+                TempData["Error"] = $"Erro ao salvar a transação: {ex.Message}";
+                await PopularSelectListsAsync(usuarioId, transacao);
+                return View(transacao);
             }
 
             return RedirectToAction(nameof(Index));
@@ -164,7 +198,7 @@ namespace FinTrack.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
 
             var transacao = await _context.Transacoes
                 .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == usuarioId);
@@ -190,7 +224,7 @@ namespace FinTrack.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
 
             var transacaoDb = await _context.Transacoes
                 .AsNoTracking()
@@ -202,6 +236,9 @@ namespace FinTrack.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            ModelState.Remove(nameof(Transacao.Valor));
+            ModelState.Remove(nameof(Transacao.UsuarioId));
+
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Preencha os campos corretamente.";
@@ -211,14 +248,29 @@ namespace FinTrack.Controllers
 
             try
             {
+                var categoriaDb = await _context.Categorias
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.Id == transacao.CategoriaId);
+
+                if (categoriaDb != null)
+                {
+                    transacao.Tipo =
+                        categoriaDb.Tipo == TipoCategoria.Receita
+                        ? Transacao.TipoTransacao.Entrada
+                        : Transacao.TipoTransacao.Saida;
+                }
+
                 transacao.UsuarioId = usuarioId;
                 _context.Update(transacao);
                 await _context.SaveChangesAsync();
+
                 TempData["Success"] = "Transação atualizada!";
             }
-            catch
+            catch (Exception ex)
             {
-                TempData["Error"] = "Erro ao atualizar a transação.";
+                TempData["Error"] = $"Erro ao atualizar a transação: {ex.Message}";
+                await PopularSelectListsAsync(usuarioId, transacao);
+                return View(transacao);
             }
 
             return RedirectToAction(nameof(Index));
@@ -232,7 +284,7 @@ namespace FinTrack.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
 
             var transacao = await _context.Transacoes
                 .Include(t => t.Conta)
@@ -253,7 +305,7 @@ namespace FinTrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
 
             var transacao = await _context.Transacoes
                 .FirstOrDefaultAsync(t => t.Id == id && t.UsuarioId == usuarioId);
@@ -270,9 +322,9 @@ namespace FinTrack.Controllers
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Transação removida com sucesso!";
             }
-            catch
+            catch (Exception ex)
             {
-                TempData["Error"] = "Erro ao excluir transação.";
+                TempData["Error"] = $"Erro ao excluir transação: {ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));

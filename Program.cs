@@ -12,8 +12,12 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());
+});
 
 builder.Services.AddDbContext<FinTrackContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("FinTrackConnection")));
@@ -60,14 +64,10 @@ builder.Services.Configure<RequestLocalizationOptions>(opts =>
 });
 
 builder.Services.AddLocalization();
-
 builder.Services.AddScoped<AccountService>();
-
 builder.Services.AddTransient<IEmailSender, ConsoleEmailSender>();
 
 var app = builder.Build();
-
-app.UseRequestLocalization(app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value);
 
 if (!app.Environment.IsDevelopment())
 {
@@ -77,6 +77,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseRequestLocalization();
 
 app.UseRouting();
 

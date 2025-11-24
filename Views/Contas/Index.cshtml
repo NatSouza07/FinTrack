@@ -6,75 +6,68 @@
 
 <div class="ft-page-container">
 
-    <h2 class="fw-bold text-white mb-3">Contas</h2>
+    <h2 class="fw-bold text-white mb-2">Contas</h2>
     <p class="text-secondary mb-4">Gerencie suas contas cadastradas.</p>
 
     <div class="ft-card p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="text-white-50 mb-0">Lista de Contas</h5>
 
-            <a asp-action="Create" class="btn ft-btn-primary px-4">
+            <a asp-action="Create" class="btn ft-btn-primary">
                 + Nova Conta
             </a>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-dark table-hover align-middle mb-0">
-                <thead>
-                    <tr class="text-warning">
-                        <th>Nome</th>
-                        <th>Saldo</th>
-                        <th class="text-center">Ações</th>
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr class="text-warning">
+                    <th>Nome</th>
+                    <th>Saldo Inicial</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-secondary py-4">
+                            Nenhuma conta cadastrada.
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Any())
+                }
+                else
+                {
+                    foreach (var conta in Model)
                     {
                         <tr>
-                            <td colspan="3" class="text-center text-secondary py-4">
-                                Nenhuma conta cadastrada.
+                            <td>@conta.Nome</td>
+
+                            <td class="fw-bold">
+                                @conta.SaldoInicial.ToString("C")
+                            </td>
+
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Details" asp-route-id="@conta.Id"
+                                       class="btn btn-sm btn-secondary px-3">Ver</a>
+
+                                    <a asp-action="Edit" asp-route-id="@conta.Id"
+                                       class="btn btn-sm btn-primary px-3">Editar</a>
+
+                                    <a asp-action="Delete" asp-route-id="@conta.Id"
+                                       class="btn btn-sm btn-danger px-3">Excluir</a>
+                                </div>
                             </td>
                         </tr>
                     }
-                    else
-                    {
-                        foreach (var conta in Model)
-                        {
-                            <tr>
-                                <td>@conta.Nome</td>
+                }
+            </tbody>
 
-                                <td class="fw-bold">
-                                    @conta.SaldoInicial.ToString("C")
-                                </td>
-
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-2">
-
-                                        <a asp-action="Details" asp-route-id="@conta.Id"
-                                           class="btn btn-sm ft-btn-secondary">
-                                            Ver
-                                        </a>
-
-                                        <a asp-action="Edit" asp-route-id="@conta.Id"
-                                           class="btn btn-sm ft-btn-primary">
-                                            Editar
-                                        </a>
-
-                                        <a asp-action="Delete" asp-route-id="@conta.Id"
-                                           class="btn btn-sm ft-btn-danger">
-                                            Excluir
-                                        </a>
-
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
-
+        </table>
     </div>
+
 </div>
 
 <style>
@@ -94,21 +87,5 @@
     .ft-page-container {
         max-width: 1100px;
         margin: 0 auto;
-    }
-
-    .ft-btn-secondary {
-        background: #444;
-        border: none;
-        color: #fff;
-        padding: 6px 14px;
-        border-radius: 6px;
-    }
-
-    .ft-btn-danger {
-        background: #d9534f;
-        color: white;
-        border: none;
-        padding: 6px 14px;
-        border-radius: 6px;
     }
 </style>

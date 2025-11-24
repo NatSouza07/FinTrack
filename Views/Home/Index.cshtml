@@ -3,76 +3,79 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12 d-flex justify-content-between align-items-center">
-            <h3 class="ft-manage-title">Dashboard</h3>
+<div class="ft-main-content">
+    <div class="ft-page-container">
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="ft-manage-title">Dashboard</h1>
+            </div>
         </div>
-    </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card p-3 bg-transparent" style="border:1px solid rgba(255,215,0,0.12);">
-                <div class="card-body">
-                    <small class="text-muted">Saldo Total</small>
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="ft-card p-3">
+                    <small class="text-secondary">Saldo Total</small>
                     <h4 class="mt-2" style="color:#ffd700">@Model.TotalSaldo.ToString("C")</h4>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card p-3 bg-transparent" style="border:1px solid rgba(255,215,0,0.12);">
-                <div class="card-body">
-                    <small class="text-muted">Receitas (mês)</small>
+            <div class="col-md-3">
+                <div class="ft-card p-3">
+                    <small class="text-secondary">Receitas (mês)</small>
                     <h4 class="mt-2">@Model.ReceitasMes.ToString("C")</h4>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card p-3 bg-transparent" style="border:1px solid rgba(255,215,0,0.12);">
-                <div class="card-body">
-                    <small class="text-muted">Despesas (mês)</small>
+            <div class="col-md-3">
+                <div class="ft-card p-3">
+                    <small class="text-secondary">Despesas (mês)</small>
                     <h4 class="mt-2">@Model.DespesasMes.ToString("C")</h4>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card p-3 bg-transparent" style="border:1px solid rgba(255,215,0,0.12);">
-                <div class="card-body">
-                    <small class="text-muted">Metas Atingidas</small>
+            <div class="col-md-3">
+                <div class="ft-card p-3">
+                    <small class="text-secondary">Metas Atingidas</small>
                     <h4 class="mt-2">@Model.MetasAtingidas</h4>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-lg-8">
-            <div class="card p-3 bg-transparent" style="border:1px solid rgba(255,215,0,0.12);">
-                <div class="card-body">
-                    <h5 class="card-title">Movimento Mensal</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-8">
+                <div class="ft-card p-3">
+                    <h5 class="mb-3">Movimento Mensal (Entradas − Saídas)</h5>
                     <canvas id="chartMonthly" height="140"></canvas>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-4">
-            <div class="card p-3 bg-transparent" style="border:1px solid rgba(255,215,0,0.12);">
-                <div class="card-body">
-                    <h5 class="card-title">Por Categoria (ano)</h5>
+            <div class="col-lg-4">
+                <div class="ft-card p-3">
+                    <h5 class="mb-3">Por Categoria (ano)</h5>
                     <canvas id="chartCategory" height="240"></canvas>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row g-3">
-        <div class="col-lg-6">
-            <div class="card p-3 bg-transparent" style="border:1px solid rgba(255,215,0,0.12);">
-                <div class="card-body">
-                    <h5 class="card-title">Últimas Transações</h5>
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="ft-card p-3">
+                    <h5 class="mb-3">Últimas Transações</h5>
                     <div class="table-responsive">
                         <table class="table table-borderless text-white mb-0">
                             <thead>
@@ -85,13 +88,19 @@
                             <tbody>
                                 @foreach (var t in Model.UltimasTransacoes)
                                 {
-                                    var dt = (DateTime)t.GetType().GetProperty("Data").GetValue(t);
-                                    var valor = (decimal)t.GetType().GetProperty("Valor").GetValue(t);
-                                    var categoria = (string)t.GetType().GetProperty("Categoria").GetValue(t);
                                     <tr>
-                                        <td>@dt.ToString("dd/MM/yyyy")</td>
-                                        <td>@categoria</td>
-                                        <td class="text-end">@valor.ToString("C")</td>
+                                        <td>@t.Data.ToString("dd/MM/yyyy")</td>
+                                        <td>@t.Categoria</td>
+                                        <td class="text-end">
+                                            @if (t.Tipo == FinTrack.Models.Transacao.TipoTransacao.Saida)
+                                            {
+                                                <span class="text-danger">@t.Valor.ToString("C")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success">@t.Valor.ToString("C")</span>
+                                            }
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -99,12 +108,10 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-6">
-            <div class="card p-3 bg-transparent" style="border:1px solid rgba(255,215,0,0.12);">
-                <div class="card-body">
-                    <h5 class="card-title">Resumo rápido</h5>
+            <div class="col-lg-6">
+                <div class="ft-card p-3">
+                    <h5 class="mb-3">Resumo rápido</h5>
                     <ul class="list-unstyled mb-0">
                         <li>Contas: <strong>@(Model.TotalSaldo != 0 ? "Ativo" : "Sem contas")</strong></li>
                         <li>Receitas mês: <strong>@Model.ReceitasMes.ToString("C")</strong></li>
@@ -118,72 +125,117 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         const monthlyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MensalLabels));
         const monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MensalValues));
         const categoryLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoriaLabels));
         const categoryData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoriaValues));
 
-        const ctxM = document.getElementById('chartMonthly').getContext('2d');
-        new Chart(ctxM, {
-            type: 'bar',
-            data: {
-                labels: monthlyLabels,
-                datasets: [{
-                    label: 'Movimento (R$)',
-                    data: monthlyData,
-                    borderWidth: 1,
-                    backgroundColor: 'rgba(255,215,0,0.9)'
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false }
+        (function () {
+            const ctx = document.getElementById('chartMonthly').getContext('2d');
+
+            const bg = monthlyData.map(v => v >= 0 ? 'rgba(255,215,0,0.9)' : 'rgba(255,99,132,0.9)');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Movimento (R$)',
+                        data: monthlyData,
+                        borderWidth: 1,
+                        backgroundColor: bg
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
                     }
                 }
-            }
-        });
+            });
+        })();
 
-        const ctxC = document.getElementById('chartCategory').getContext('2d');
-        new Chart(ctxC, {
-            type: 'pie',
-            data: {
-                labels: categoryLabels,
-                datasets: [{
-                    data: categoryData,
-                    backgroundColor: [
-                        '#ffd700','#f9c500','#e6c200','#d1a100','#c09000','#b07a00','#a05f00','#8a4700'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-            }
-        });
+        (function () {
+            const ctx = document.getElementById('chartCategory').getContext('2d');
+
+            const catLabels = categoryLabels.length ? categoryLabels : ['(sem dados)'];
+            const catData = categoryData.length ? categoryData : [1];
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catData,
+                        backgroundColor: [
+                            '#ffd700','#f9c500','#e6c200','#d1a100','#c09000','#b07a00','#a05f00','#8a4700'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        })();
     </script>
 }
 
 <style>
     .ft-card {
-        background: rgba(255, 255, 255, 0.04);
+        background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 16px;
-        backdrop-filter: blur(12px);
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .ft-manage-title {
+        font-size: 1.5rem;
+        color: #fff;
+        margin: 0;
     }
 
     .ft-main-content {
         background: #1e1e1e !important;
-        padding: 40px !important;
+        padding: 32px !important;
         min-height: 100vh;
     }
 
     .ft-page-container {
-        max-width: 1100px;
+        max-width: 1200px;
         margin: 0 auto;
+    }
+
+    .text-success {
+        color: #3ad76a !important;
+    }
+
+    .text-danger {
+        color: #ff6b6b !important;
+    }
+
+    table.table td, table.table th {
+        vertical-align: middle;
+        border-top: 0;
     }
 </style>

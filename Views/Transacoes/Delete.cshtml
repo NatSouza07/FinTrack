@@ -6,52 +6,51 @@
 
 <div class="ft-page-container">
 
-    <h2 class="fw-bold text-white mb-3">Excluir Transação</h2>
-    <p class="text-secondary mb-4">Confirme a exclusão da transação selecionada.</p>
+    <h2 class="fw-bold text-danger mb-3">Excluir Transação</h2>
+    <p class="text-secondary mb-4">Tem certeza que deseja excluir esta transação?</p>
 
     <div class="ft-card p-4">
 
-        <h5 class="text-warning fw-bold mb-3">Tem certeza que deseja excluir esta transação?</h5>
+        <dl class="row text-white">
 
-        <div class="mb-3">
-            <label class="form-label text-white-50">Data</label>
-            <p class="text-white fw-semibold">@Model.Data.ToString("dd/MM/yyyy")</p>
-        </div>
+            <dt class="col-sm-3">Data</dt>
+            <dd class="col-sm-9">@Model.Data.ToString("dd/MM/yyyy")</dd>
 
-        <div class="mb-3">
-            <label class="form-label text-white-50">Valor</label>
-            <p class="@((Model.Tipo == FinTrack.Models.Transacao.TipoTransacao.Entrada) ? "text-success fw-bold" : "text-danger fw-bold")">
-                @Model.Valor.ToString("C2")
-            </p>
-        </div>
+            <dt class="col-sm-3">Valor</dt>
+            <dd class="col-sm-9">@Model.Valor.ToString("C")</dd>
 
-        <div class="mb-3">
-            <label class="form-label text-white-50">Tipo</label>
-            <p class="text-white fw-semibold">@Model.Tipo</p>
-        </div>
+            <dt class="col-sm-3">Categoria</dt>
+            <dd class="col-sm-9">@Model.Categoria.Nome</dd>
 
-        <div class="mb-3">
-            <label class="form-label text-white-50">Categoria</label>
-            <p class="text-white fw-semibold">@Model.Categoria.Nome</p>
-        </div>
+            <dt class="col-sm-3">Movimentação</dt>
+            <dd class="col-sm-9">
+                @if (Model.Tipo == FinTrack.Models.Transacao.TipoTransacao.Entrada)
+                {
+                    <span class="badge bg-success px-3 py-2">Entrada</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger px-3 py-2">Saída</span>
+                }
+            </dd>
 
-        <div class="mb-3">
-            <label class="form-label text-white-50">Conta</label>
-            <p class="text-white fw-semibold">@Model.Conta.Nome</p>
-        </div>
+            <dt class="col-sm-3">Conta</dt>
+            <dd class="col-sm-9">@Model.Conta.Nome</dd>
 
-        <div class="mb-3">
-            <label class="form-label text-white-50">Tipo de Pagamento</label>
-            <p class="text-white fw-semibold">@Model.TipoPagamento.Nome</p>
-        </div>
+            <dt class="col-sm-3">Pagamento</dt>
+            <dd class="col-sm-9">@Model.TipoPagamento.Nome</dd>
 
-        <hr class="border-secondary" />
+        </dl>
 
-        <form asp-action="Delete" method="post">
+        <form asp-action="Delete">
             <input type="hidden" asp-for="Id" />
+
             <div class="mt-4 d-flex gap-3">
                 <a asp-action="Index" class="btn btn-secondary px-4">Cancelar</a>
-                <button type="submit" class="btn btn-danger px-4">Excluir definitivamente</button>
+
+                <button type="submit" class="btn btn-danger px-4 fw-bold" style="border-radius:10px;">
+                    Confirmar Exclusão
+                </button>
             </div>
         </form>
 
@@ -59,18 +58,13 @@
 
 </div>
 
+
 <style>
     .ft-card {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.06);
         border-radius: 16px;
         backdrop-filter: blur(12px);
-    }
-
-    .ft-main-content {
-        background: #1e1e1e !important;
-        padding: 40px !important;
-        min-height: 100vh;
     }
 
     .ft-page-container {

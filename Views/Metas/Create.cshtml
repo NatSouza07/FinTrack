@@ -18,7 +18,10 @@
 
             <div class="mb-3">
                 <label asp-for="ValorMeta" class="form-label text-white-50"></label>
-                <input asp-for="ValorMeta" class="form-control money" inputmode="numeric" />
+                <input asp-for="ValorMeta"
+                       class="form-control ft-money"
+                       inputmode="numeric"
+                       data-val="false" />
                 <span asp-validation-for="ValorMeta" class="text-danger"></span>
             </div>
 

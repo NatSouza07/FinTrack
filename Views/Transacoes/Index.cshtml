@@ -9,7 +9,9 @@
 
         <div class="mb-4">
             <h1 class="fw-bold text-white" style="font-size: 2rem;">Transações</h1>
-            <p class="text-secondary" style="margin-top: -6px;">Visualize, filtre e gerencie suas transações.</p>
+            <p class="text-secondary" style="margin-top: -6px;">
+                Visualize, filtre e gerencie suas transações.
+            </p>
         </div>
 
         <div class="ft-card p-4 mb-4">
@@ -30,63 +32,87 @@
 
                     <div class="col-md-3">
                         <label class="form-label text-white-50">Categoria</label>
+
+                        @{
+                            var categoriaAtual = Context.Request.Query["categoriaId"].ToString();
+                        }
+
                         <select name="categoriaId" class="form-select">
                             <option value="">Todas</option>
-                            @{
-                                var categoriaAtual = Context.Request.Query["categoriaId"].ToString();
-                                foreach (var item in (SelectList)ViewBag.Categorias)
-                                {
-                                    var marcado = item.Value == categoriaAtual ? " selected" : "";
-                                    @Html.Raw($"<option value='{item.Value}'{marcado}>{item.Text}</option>")
-                                    ;
-                                }
+
+                            @foreach (var item in (SelectList)ViewBag.CategoriasSelect)
+                            {
+                                <option value="@item.Value"
+                                        selected="@(item.Value == categoriaAtual)">
+                                    @item.Text
+                                </option>
                             }
                         </select>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label text-white-50">Conta</label>
+
+                        @{
+                            var contaAtual = Context.Request.Query["contaId"].ToString();
+                        }
+
                         <select name="contaId" class="form-select">
                             <option value="">Todas</option>
-                            @{
-                                var contaAtual = Context.Request.Query["contaId"].ToString();
-                                foreach (var item in (SelectList)ViewBag.Contas)
-                                {
-                                    var marcado = item.Value == contaAtual ? " selected" : "";
-                                    @Html.Raw($"<option value='{item.Value}'{marcado}>{item.Text}</option>")
-                                    ;
-                                }
+
+                            @foreach (var item in (SelectList)ViewBag.Contas)
+                            {
+                                <option value="@item.Value"
+                                        selected="@(item.Value == contaAtual)">
+                                    @item.Text
+                                </option>
                             }
                         </select>
                     </div>
+
                 </div>
 
                 <div class="row g-3 mt-3">
+
                     <div class="col-md-3">
                         <label class="form-label text-white-50">Tipo Pagamento</label>
+
+                        @{
+                            var pagamentoAtual = Context.Request.Query["tipoPagamentoId"].ToString();
+                        }
+
                         <select name="tipoPagamentoId" class="form-select">
                             <option value="">Todos</option>
-                            @{
-                                var pagamentoAtual = Context.Request.Query["tipoPagamentoId"].ToString();
-                                foreach (var item in (SelectList)ViewBag.TiposPagamento)
-                                {
-                                    var marcado = item.Value == pagamentoAtual ? " selected" : "";
-                                    @Html.Raw($"<option value='{item.Value}'{marcado}>{item.Text}</option>")
-                                    ;
-                                }
+
+                            @foreach (var item in (SelectList)ViewBag.TiposPagamento)
+                            {
+                                <option value="@item.Value"
+                                        selected="@(item.Value == pagamentoAtual)">
+                                    @item.Text
+                                </option>
                             }
                         </select>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label text-white-50">Tipo</label>
+
                         @{
                             var tipoAtual = Context.Request.Query["tipo"].ToString();
                         }
+
                         <select name="tipo" class="form-select">
                             <option value="">Todos</option>
-                            @Html.Raw($"<option value='Entrada'{(tipoAtual == "Entrada" ? " selected" : "")}>Entrada</option>");
-                            @Html.Raw($"<option value='Saída'{(tipoAtual == "Saída" ? " selected" : "")}>Saída</option>");
+
+                            <option value="Entrada"
+                                    selected="@(tipoAtual == "Entrada")">
+                                Entrada
+                            </option>
+
+                            <option value="Saida"
+                                    selected="@(tipoAtual == "Saida")">
+                                Saída
+                            </option>
                         </select>
                     </div>
 
@@ -105,18 +131,21 @@
                             + Nova Transação
                         </a>
                     </div>
+
                 </div>
+
             </form>
         </div>
 
         <div class="ft-card p-3">
+
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="text-white-50">Listagem de Transações</span>
                 <span class="text-white-50">Total: <strong>@Model.Count()</strong></span>
             </div>
 
             <table class="table table-dark table-hover align-middle"
-                   style="background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden;">
+                   style="background: rgba(255,255,255,0.03); border-radius: 12px;">
                 <thead>
                     <tr class="text-warning">
                         <th>Data</th>
@@ -129,6 +158,7 @@
                     </tr>
                 </thead>
                 <tbody>
+
                     @if (!Model.Any())
                     {
                         <tr>
@@ -146,10 +176,21 @@
                                 <td>@t.Categoria.Nome</td>
                                 <td>@t.Conta.Nome</td>
                                 <td>@t.TipoPagamento.Nome</td>
-                                <td>@t.Tipo</td>
+                                <td>
+                                    @if (t.Tipo == Transacao.TipoTransacao.Entrada)
+                                    {
+                                        <span class="badge bg-success">Entrada</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Saída</span>
+                                    }
+                                </td>
+
                                 <td class="fw-bold @(t.Tipo == Transacao.TipoTransacao.Entrada ? "text-success" : "text-danger")">
                                     @t.Valor.ToString("C")
                                 </td>
+
                                 <td class="text-center">
                                     <a class="btn btn-sm btn-secondary" href="/Transacoes/Details/@t.Id">Ver</a>
                                     <a class="btn btn-sm btn-primary" href="/Transacoes/Edit/@t.Id">Editar</a>
@@ -158,6 +199,7 @@
                             </tr>
                         }
                     }
+
                 </tbody>
             </table>
         </div>
@@ -177,8 +219,7 @@
             dateFormat: "Y-m-d",
             altInput: true,
             altFormat: "d/m/Y",
-            locale: "pt",
-            theme: "dark"
+            locale: "pt"
         });
     </script>
 }

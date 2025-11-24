@@ -22,9 +22,14 @@ namespace FinTrack.Controllers
             _userManager = userManager;
         }
 
+        private string _GetUserId()
+        {
+            return _userManager.GetUserId(User);
+        }
+
         public async Task<IActionResult> Index()
         {
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
             var metas = await _context.Metas
@@ -35,9 +40,9 @@ namespace FinTrack.Controllers
             {
                 decimal progresso = await _context.Transacoes
                     .Where(t => t.UsuarioId == usuarioId &&
-                                t.Tipo == Transacao.TipoTransacao.Entrada &&
-                                t.Data.Month == meta.Mes &&
-                                t.Data.Year == meta.Ano)
+                                 t.Tipo == Transacao.TipoTransacao.Entrada &&
+                                 t.Data.Month == meta.Mes &&
+                                 t.Data.Year == meta.Ano)
                     .SumAsync(t => (decimal?)t.Valor) ?? 0;
 
                 meta.ProgressoCalculado = progresso;
@@ -49,21 +54,29 @@ namespace FinTrack.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Meta não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
             var meta = await _context.Metas
                 .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
 
-            if (meta == null) return NotFound();
+            if (meta == null)
+            {
+                TempData["Error"] = "Meta não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
             decimal progresso = await _context.Transacoes
                 .Where(t => t.UsuarioId == usuarioId &&
-                            t.Tipo == Transacao.TipoTransacao.Entrada &&
-                            t.Data.Month == meta.Mes &&
-                            t.Data.Year == meta.Ano)
+                             t.Tipo == Transacao.TipoTransacao.Entrada &&
+                             t.Data.Month == meta.Mes &&
+                             t.Data.Year == meta.Ano)
                 .SumAsync(t => (decimal?)t.Valor) ?? 0;
 
             meta.ProgressoCalculado = progresso;
@@ -81,31 +94,53 @@ namespace FinTrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Meta meta)
         {
-            if (!ModelState.IsValid)
-                return View(meta);
-
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
-            meta.UsuarioId = usuarioId;
+            ModelState.Remove(nameof(Meta.ValorMeta));
+            ModelState.Remove(nameof(Meta.UsuarioId));
 
-            _context.Add(meta);
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Preencha os campos corretamente.";
+                return View(meta);
+            }
+
+            try
+            {
+                meta.UsuarioId = usuarioId;
+                _context.Add(meta);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Meta criada com sucesso!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erro ao criar meta: {ex.Message}";
+                return View(meta);
+            }
 
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Meta não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
             var meta = await _context.Metas
                 .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
 
-            if (meta == null) return NotFound();
+            if (meta == null)
+            {
+                TempData["Error"] = "Meta não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(meta);
         }
@@ -114,33 +149,68 @@ namespace FinTrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Meta meta)
         {
-            if (id != meta.Id) return NotFound();
+            if (id != meta.Id)
+            {
+                TempData["Error"] = "Meta inválida.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
+            var metaDb = await _context.Metas.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
+
+            if (metaDb == null)
+            {
+                TempData["Error"] = "Você não tem permissão para editar esta meta.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ModelState.Remove(nameof(Meta.ValorMeta));
+            ModelState.Remove(nameof(Meta.UsuarioId));
+
             if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Preencha os campos corretamente.";
                 return View(meta);
+            }
 
-            meta.UsuarioId = usuarioId;
-
-            _context.Update(meta);
-            await _context.SaveChangesAsync();
+            try
+            {
+                meta.UsuarioId = usuarioId;
+                _context.Update(meta);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Meta atualizada com sucesso!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erro ao atualizar meta: {ex.Message}";
+                return View(meta);
+            }
 
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                TempData["Error"] = "Meta não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
             var meta = await _context.Metas
                 .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
 
-            if (meta == null) return NotFound();
+            if (meta == null)
+            {
+                TempData["Error"] = "Meta não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return View(meta);
         }
@@ -149,16 +219,28 @@ namespace FinTrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null) return Unauthorized();
 
             var meta = await _context.Metas
                 .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == usuarioId);
 
-            if (meta == null) return Unauthorized();
+            if (meta == null)
+            {
+                TempData["Error"] = "Meta não encontrada.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            _context.Metas.Remove(meta);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Metas.Remove(meta);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Meta excluída com sucesso!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erro ao excluir meta: {ex.Message}";
+            }
 
             return RedirectToAction(nameof(Index));
         }

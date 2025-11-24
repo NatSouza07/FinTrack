@@ -20,32 +20,43 @@
 
             <div class="mb-3">
                 <label asp-for="Valor" class="form-label text-white-50"></label>
-                <input asp-for="Valor" class="form-control ft-money" />
+                <input asp-for="Valor" class="form-control ft-money" autocomplete="off" data-val="false" />
                 <span asp-validation-for="Valor" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Tipo" class="form-label text-white-50"></label>
-                <select asp-for="Tipo" class="form-select" asp-items="ViewBag.Tipos"></select>
-                <span asp-validation-for="Tipo" class="text-danger"></span>
-            </div>
+                <label class="form-label text-white-50">Categoria</label>
 
-            <div class="mb-3">
-                <label asp-for="CategoriaId" class="form-label text-white-50"></label>
-                <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.Categorias"></select>
+                <select asp-for="CategoriaId" class="form-select" id="categoriaSelect">
+                    <option value="">Selecione</option>
+
+                    @foreach (var cat in ViewBag.Categorias)
+                    {
+                        <option value="@cat.Id" data-tipo="@((int)cat.Tipo)">
+                            @cat.Nome
+                        </option>
+                    }
+                </select>
+
                 <span asp-validation-for="CategoriaId" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="ContaId" class="form-label text-white-50"></label>
-                <select asp-for="ContaId" class="form-select" asp-items="ViewBag.Contas"></select>
-                <span asp-validation-for="ContaId" class="text-danger"></span>
+                <label class="form-label text-white-50">Movimentação</label>
+                <input id="movimentacao" class="form-control" readonly />
+                <input type="hidden" asp-for="Tipo" id="TipoHidden" />
             </div>
 
             <div class="mb-3">
                 <label asp-for="TipoPagamentoId" class="form-label text-white-50"></label>
                 <select asp-for="TipoPagamentoId" class="form-select" asp-items="ViewBag.TiposPagamento"></select>
                 <span asp-validation-for="TipoPagamentoId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContaId" class="form-label text-white-50"></label>
+                <select asp-for="ContaId" class="form-select" asp-items="ViewBag.Contas"></select>
+                <span asp-validation-for="ContaId" class="text-danger"></span>
             </div>
 
             <div class="mt-4 d-flex gap-3">
@@ -64,9 +75,6 @@
 
 </div>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
@@ -79,9 +87,33 @@
             dateFormat: "Y-m-d",
             altInput: true,
             altFormat: "d/m/Y",
-            locale: "pt",
-            theme: "dark"
+            locale: "pt"
         });
+
+        const categoriaSelect = document.getElementById("categoriaSelect");
+        const movInput = document.getElementById("movimentacao");
+        const tipoHidden = document.getElementById("TipoHidden");
+
+        function atualizarMovimentacao() {
+            let opt = categoriaSelect.options[categoriaSelect.selectedIndex];
+            let tipo = opt ? opt.getAttribute("data-tipo") : null;
+
+            if (tipo === "1") {
+                movInput.value = "Entrada";
+                tipoHidden.value = "1";
+            }
+            else if (tipo === "2") {
+                movInput.value = "Saída";
+                tipoHidden.value = "2";
+            }
+            else {
+                movInput.value = "";
+                tipoHidden.value = "";
+            }
+        }
+
+        categoriaSelect.addEventListener("change", atualizarMovimentacao);
+        atualizarMovimentacao();
 
         document.addEventListener("DOMContentLoaded", function () {
             AutoNumeric.multiple('.ft-money', {
@@ -94,9 +126,9 @@
 
             const form = document.querySelector("form");
             form.addEventListener("submit", function () {
-                document.querySelectorAll(".ft-money").forEach(function (el) {
+                document.querySelectorAll(".ft-money").forEach(el => {
                     let v = el.value ?? "";
-                    v = v.replace(/\s/g, "").replace(/R\$|r\$/g, "").replace(/\./g, "");
+                    v = v.replace(/\s/g, "").replace(/R\$|r\$/gi, "").replace(/\./g, "").replace(",", ".");
                     el.value = v;
                 });
             });
@@ -110,12 +142,6 @@
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 16px;
         backdrop-filter: blur(12px);
-    }
-
-    .ft-main-content {
-        background: #1e1e1e !important;
-        padding: 40px !important;
-        min-height: 100vh;
     }
 
     .ft-page-container {

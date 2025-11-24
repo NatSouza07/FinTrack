@@ -1,6 +1,5 @@
 ﻿using FinTrack.Data;
 using FinTrack.Models;
-using FinTrack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,32 +12,29 @@ namespace FinTrack.Controllers
     {
         private readonly FinTrackContext _context;
         private readonly UserManager<Usuario> _userManager;
-        private readonly AccountService _accountService;
 
         public ContasController(
             FinTrackContext context,
-            UserManager<Usuario> userManager,
-            AccountService accountService)
+            UserManager<Usuario> userManager)
         {
             _context = context;
             _userManager = userManager;
-            _accountService = accountService;
+        }
+
+        private string _GetUserId()
+        {
+            return _userManager.GetUserId(User);
         }
 
         public async Task<IActionResult> Index()
         {
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null)
                 return Unauthorized();
 
             var contas = await _context.Contas
                 .Where(c => c.UsuarioId == usuarioId)
                 .ToListAsync();
-
-            foreach (var conta in contas)
-            {
-                conta.SaldoInicial = await _accountService.GetSaldoAsync(conta.Id, usuarioId);
-            }
 
             return View(contas);
         }
@@ -48,7 +44,7 @@ namespace FinTrack.Controllers
             if (id == null)
                 return NotFound();
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null)
                 return Unauthorized();
 
@@ -57,8 +53,6 @@ namespace FinTrack.Controllers
 
             if (conta == null)
                 return NotFound();
-
-            conta.SaldoInicial = await _accountService.GetSaldoAsync(conta.Id, usuarioId);
 
             return View(conta);
         }
@@ -72,27 +66,49 @@ namespace FinTrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Conta conta)
         {
-            if (!ModelState.IsValid)
-                return View(conta);
-
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null)
                 return Unauthorized();
+
+            if (ModelState.ContainsKey(nameof(Conta.SaldoInicial)))
+            {
+                ModelState.Remove(nameof(Conta.SaldoInicial));
+            }
+
+            if (ModelState.ContainsKey(nameof(Conta.UsuarioId)))
+            {
+                ModelState.Remove(nameof(Conta.UsuarioId));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Existem erros de validação. Verifique os campos.";
+                return View(conta);
+            }
 
             conta.UsuarioId = usuarioId;
 
             _context.Add(conta);
-            await _context.SaveChangesAsync();
 
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erro fatal ao salvar: {ex.Message}";
+                return View(conta);
+            }
+
+            TempData["Success"] = "Conta criada com sucesso!";
             return RedirectToAction(nameof(Index));
         }
-
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null)
                 return Unauthorized();
 
@@ -112,25 +128,43 @@ namespace FinTrack.Controllers
             if (id != conta.Id)
                 return NotFound();
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null)
                 return Unauthorized();
 
-            var contaDb = await _context.Contas
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == id && c.UsuarioId == usuarioId);
-
-            if (contaDb == null)
-                return Unauthorized();
+            if (ModelState.ContainsKey(nameof(Conta.UsuarioId)))
+            {
+                ModelState.Remove(nameof(Conta.UsuarioId));
+            }
 
             if (!ModelState.IsValid)
                 return View(conta);
 
             conta.UsuarioId = usuarioId;
 
-            _context.Update(conta);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Update(conta);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Contas.Any(e => e.Id == id && e.UsuarioId == usuarioId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erro ao atualizar a conta: {ex.Message}";
+                return View(conta);
+            }
 
+            TempData["Success"] = "Conta atualizada!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -139,7 +173,7 @@ namespace FinTrack.Controllers
             if (id == null)
                 return NotFound();
 
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null)
                 return Unauthorized();
 
@@ -156,7 +190,7 @@ namespace FinTrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var usuarioId = _userManager.GetUserId(User);
+            var usuarioId = _GetUserId();
             if (usuarioId is null)
                 return Unauthorized();
 
@@ -167,8 +201,18 @@ namespace FinTrack.Controllers
                 return Unauthorized();
 
             _context.Contas.Remove(conta);
-            await _context.SaveChangesAsync();
 
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erro ao excluir a conta: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["Success"] = "Conta excluída!";
             return RedirectToAction(nameof(Index));
         }
     }
