@@ -1,9 +1,9 @@
-using FinTrack.Data;
+﻿using FinTrack.Data;
+using FinTrack.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FinTrack.Models;
 
 namespace FinTrack.Controllers
 {
@@ -18,26 +18,69 @@ namespace FinTrack.Controllers
             _context = context;
             _userManager = userManager;
         }
+        // PÁGINA PRINCIPAL DE RELATÓRIOS (GRÁFICOS)
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        // MÉTODO JSON → MonthlyTotalsJson
 
         [HttpGet]
-        public async Task<IActionResult> MensalJson(int ano)
+        public async Task<IActionResult> MonthlyTotalsJson(int year)
         {
             var usuarioId = _userManager.GetUserId(User);
             if (usuarioId == null)
                 return Unauthorized();
 
-            var valores = new decimal[12];
-
             var dados = await _context.Transacoes
-                .Where(t => t.UsuarioId == usuarioId && t.Data.Year == ano)
+                .Where(t => t.UsuarioId == usuarioId && t.Data.Year == year)
                 .GroupBy(t => t.Data.Month)
-                .Select(g => new { Mes = g.Key, Total = g.Sum(t => t.Valor) })
+                .Select(g => new
+                {
+                    month = g.Key,
+                    entrada = g.Where(t => t.Tipo == Transacao.TipoTransacao.Entrada)
+                               .Sum(t => (decimal?)t.Valor) ?? 0,
+                    saida = g.Where(t => t.Tipo == Transacao.TipoTransacao.Saida)
+                             .Sum(t => (decimal?)t.Valor) ?? 0
+                })
+                .OrderBy(x => x.month)
                 .ToListAsync();
 
-            foreach (var item in dados)
-                valores[item.Mes - 1] = item.Total;
+            return Json(dados);
+        }
 
-            return Json(valores);
+
+        // MÉTODO JSON → CategoryTotalsJson
+        [HttpGet]
+        public async Task<IActionResult> CategoryTotalsJson(int year, int month)
+        {
+            var usuarioId = _userManager.GetUserId(User);
+            if (usuarioId == null)
+                return Unauthorized();
+
+            var dados = await _context.Transacoes
+                .Where(t => t.UsuarioId == usuarioId &&
+                            t.Data.Year == year &&
+                            t.Data.Month == month)
+                .GroupBy(t => t.Categoria.Nome)
+                .Select(g => new
+                {
+                    categoria = g.Key,
+                    total = g.Sum(t => (decimal?)t.Valor) ?? 0
+                })
+                .OrderByDescending(x => x.total)
+                .ToListAsync();
+
+            return Json(dados);
+        }
+
+        // AGRUPAMENTO POR CATEGORIA
+
+        public IActionResult Agrupamento()
+        {
+            return View();
         }
 
         [HttpGet]
@@ -48,7 +91,7 @@ namespace FinTrack.Controllers
                 return Unauthorized();
 
             if (inicio > fim)
-                return BadRequest("A data inicial n�o pode ser maior que a final.");
+                return BadRequest("A data inicial não pode ser maior que a data final.");
 
             var dados = await _context.Transacoes
                 .Where(t => t.UsuarioId == usuarioId &&
@@ -57,12 +100,20 @@ namespace FinTrack.Controllers
                 .GroupBy(t => t.Categoria.Nome)
                 .Select(g => new
                 {
-                    label = g.Key,
-                    value = g.Sum(t => t.Valor)
+                    categoria = g.Key,
+                    total = g.Sum(t => (decimal?)t.Valor) ?? 0
                 })
+                .OrderByDescending(x => x.total)
                 .ToListAsync();
 
             return Json(dados);
+        }
+
+        // 3) PIVOT (CATEGORIA × MÊS)
+
+        public IActionResult PivotView()
+        {
+            return View();
         }
 
         [HttpGet]
@@ -79,7 +130,7 @@ namespace FinTrack.Controllers
 
             var meses = Enumerable.Range(1, 12);
 
-            var matriz = new List<object>();
+            var matriz = new List<Dictionary<string, object>>();
 
             foreach (var categoria in categorias)
             {
@@ -104,16 +155,6 @@ namespace FinTrack.Controllers
             }
 
             return Json(matriz);
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult PivotView()
-        {
-            return View();
         }
     }
 }
